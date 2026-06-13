@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'services/database_service.dart';
 import 'views/auth/login_view.dart';
+import 'views/auth/splash_view.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -73,7 +74,7 @@ class MyApp extends StatelessWidget {
           color: Colors.white,
         ),
       ),
-      home: const LoginView(),
+      home: const SplashView(),
     );
   }
 }
