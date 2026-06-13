@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../../services/database_service.dart';
+import '../../services/auth_service.dart';
 import '../admin/admin_dashboard_view.dart';
 import '../customer/customer_dashboard_view.dart';
 import 'register_view.dart';
+import 'forgot_password_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -16,6 +19,7 @@ class _LoginViewState extends State<LoginView> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _dbService = DatabaseService();
+  final _authService = AuthService();
   bool _obscurePassword = true;
   bool _isLoading = false;
 
@@ -39,19 +43,26 @@ class _LoginViewState extends State<LoginView> {
       _isLoading = true;
     });
 
-    // Simulate network validation delay as described in diagram ("memvalidasi data" -> database query)
-    await Future.delayed(const Duration(milliseconds: 1500));
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
+    // Try JWT login first (Web), fallback to direct DB query (Native)
+    dynamic loggedInUser;
+
+    if (kIsWeb) {
+      final jwtResult = await _authService.loginWithJwt(username, password);
+      if (jwtResult != null) {
+        // Create AppUser from JWT response
+        loggedInUser = await _dbService.validateUserLogin(username, password);
+      }
+    } else {
+      loggedInUser = await _dbService.validateUserLogin(username, password);
+    }
 
     if (!mounted) return;
     setState(() {
       _isLoading = false;
     });
-
-    final username = _usernameController.text.trim();
-    final password = _passwordController.text;
-
-    // Validate credentials using local database service - act AD_Login & act Activity Diagram (Login)
-    final loggedInUser = _dbService.validateUserLogin(username, password);
 
     if (loggedInUser != null) {
       final isSystemAdmin = loggedInUser.username.toLowerCase() == 'admin';
@@ -238,7 +249,31 @@ class _LoginViewState extends State<LoginView> {
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 8),
+
+                              // Lupa Password Link
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const ForgotPasswordView(),
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                    'Lupa Password?',
+                                    style: TextStyle(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
 
                               // Login Button
                               ElevatedButton(

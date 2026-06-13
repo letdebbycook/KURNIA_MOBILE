@@ -51,7 +51,7 @@ class _ProfileViewState extends State<ProfileView> {
     });
 
     await _dbService.init();
-    final profile = _dbService.getUserProfile(widget.username);
+    final profile = await _dbService.getUserProfile(widget.username);
 
     if (!mounted) return;
 
@@ -169,8 +169,8 @@ class _ProfileViewState extends State<ProfileView> {
                       backgroundImage: NetworkImage(
                         _useCustomUrl ? _urlController.text : _selectedAvatarUrl,
                       ),
-                      onForegroundImageError: (exception, stackTrace) {
-                        // Safe fallback image
+                      onBackgroundImageError: (exception, stackTrace) {
+                        // Safe fallback for broken image URLs
                       },
                       child: (_useCustomUrl && _urlController.text.isEmpty)
                           ? Icon(Icons.person, size: 48, color: theme.colorScheme.onPrimaryContainer)
