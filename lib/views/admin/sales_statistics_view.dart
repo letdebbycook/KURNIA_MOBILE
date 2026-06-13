@@ -34,8 +34,12 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
 
       if (!mounted) return;
 
+      final transactions = await _dbService.getTransactions();
+
+      if (!mounted) return;
+
       setState(() {
-        _orders = _dbService.getTransactions();
+        _orders = transactions;
         _isLoading = false;
       });
     } catch (e) {

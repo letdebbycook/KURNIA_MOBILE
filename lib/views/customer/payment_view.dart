@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/database_service.dart';
 import '../../models/product.dart';
 import '../../models/transaksi.dart';
+import '../../widgets/product_image_helper.dart';
 
 class PaymentView extends StatefulWidget {
   final Product product;
@@ -62,7 +63,7 @@ class _PaymentViewState extends State<PaymentView> {
 
     if (success) {
       // Fetch latest transaction to show the auto-increment id
-      final txList = _dbService.getTransactions();
+      final txList = await _dbService.getTransactions();
       final savedTx = txList.isNotEmpty ? txList.last : order;
 
       setState(() {
@@ -169,12 +170,12 @@ class _PaymentViewState extends State<PaymentView> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
+                    child: ProductImageHelper.buildProductImage(
                       widget.product.imageUrl,
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
+                      errorWidget: Container(
                         width: 80,
                         height: 80,
                         color: theme.colorScheme.primaryContainer,

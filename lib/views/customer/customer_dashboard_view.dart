@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../services/database_service.dart';
+import '../../services/cart_service.dart';
 import '../../models/product.dart';
+import '../../widgets/product_image_helper.dart';
 import '../auth/login_view.dart';
-import 'payment_view.dart';
+import 'cart_view.dart';
 import 'profile_view.dart';
 
 class CustomerDashboardView extends StatefulWidget {
@@ -16,6 +18,7 @@ class CustomerDashboardView extends StatefulWidget {
 
 class _CustomerDashboardViewState extends State<CustomerDashboardView> {
   final DatabaseService _dbService = DatabaseService();
+  final CartService _cartService = CartService();
   List<Product> _products = [];
   List<Product> _filteredProducts = [];
   bool _isLoading = true;
@@ -44,8 +47,10 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
     });
     await _dbService.init();
     if (!mounted) return;
+    final products = await _dbService.getProducts();
+    if (!mounted) return;
     setState(() {
-      _products = _dbService.getProducts();
+      _products = products;
       _filteredProducts = _products;
       _isLoading = false;
     });
@@ -110,22 +115,20 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                   const SizedBox(height: 20),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: Image.network(
+                    child: ProductImageHelper.buildProductImage(
                       product.imageUrl,
                       height: 200,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          height: 200,
-                          color: theme.colorScheme.primaryContainer,
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 48,
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                        );
-                      },
+                      errorWidget: Container(
+                        height: 200,
+                        color: theme.colorScheme.primaryContainer,
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 48,
+                          color: theme.colorScheme.onPrimaryContainer,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -154,27 +157,55 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                     style: TextStyle(color: Colors.grey.shade700, height: 1.5, fontSize: 14),
                   ),
                   const SizedBox(height: 32),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Close sheet
-                      // Navigate to Checkout/Payment page
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentView(product: product, idUser: widget.idUser),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            _cartService.addProduct(product);
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${product.name} ditambahkan ke keranjang!'),
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: theme.colorScheme.primary,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.add_shopping_cart, size: 18),
+                          label: const Text('Keranjang', style: TextStyle(fontWeight: FontWeight.bold)),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text(
-                      'BELI SEKARANG',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.5),
-                    ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            _cartService.addProduct(product);
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CartView(idUser: widget.idUser),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.payment_outlined, size: 18),
+                          label: const Text('Beli Sekarang', style: TextStyle(fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -215,6 +246,47 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
               icon: const Icon(Icons.refresh),
               onPressed: _loadProducts,
               tooltip: 'Segarkan data',
+            ),
+          if (_currentIndex == 0)
+            ListenableBuilder(
+              listenable: _cartService,
+              builder: (context, _) {
+                final count = _cartService.totalItems;
+                return Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.shopping_cart_outlined),
+                      tooltip: 'Keranjang',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CartView(idUser: widget.idUser),
+                          ),
+                        );
+                      },
+                    ),
+                    if (count > 0)
+                      Positioned(
+                        right: 6,
+                        top: 6,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                          child: Text(
+                            '$count',
+                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -356,18 +428,16 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                                     Expanded(
                                       child: ClipRRect(
                                         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                                        child: Image.network(
+                                        child: ProductImageHelper.buildProductImage(
                                           product.imageUrl,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) {
-                                            return Container(
-                                              color: theme.colorScheme.primaryContainer,
-                                              child: Icon(
-                                                Icons.image_not_supported_outlined,
-                                                color: theme.colorScheme.onPrimaryContainer,
-                                              ),
-                                            );
-                                          },
+                                          errorWidget: Container(
+                                            color: theme.colorScheme.primaryContainer,
+                                            child: Icon(
+                                              Icons.image_not_supported_outlined,
+                                              color: theme.colorScheme.onPrimaryContainer,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -391,27 +461,82 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                                             style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
                                           ),
                                           const SizedBox(height: 6),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  _formatCurrency(product.price),
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: theme.colorScheme.secondary,
-                                                    fontSize: 13,
-                                                  ),
-                                                ),
-                                              ),
-                                              Icon(
-                                                Icons.add_shopping_cart,
-                                                size: 16,
-                                                color: theme.colorScheme.primary,
-                                              )
-                                            ],
+                                          Text(
+                                            _formatCurrency(product.price),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: theme.colorScheme.secondary,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          ListenableBuilder(
+                                            listenable: _cartService,
+                                            builder: (context, _) {
+                                              final qty = _cartService.quantityOf(product);
+                                              return qty == 0
+                                                  ? SizedBox(
+                                                      width: double.infinity,
+                                                      child: ElevatedButton.icon(
+                                                        onPressed: () {
+                                                          _cartService.addProduct(product);
+                                                          ScaffoldMessenger.of(context).showSnackBar(
+                                                            SnackBar(
+                                                              content: Text('${product.name} ditambahkan ke keranjang!'),
+                                                              behavior: SnackBarBehavior.floating,
+                                                              backgroundColor: theme.colorScheme.primary,
+                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                                              duration: const Duration(seconds: 1),
+                                                            ),
+                                                          );
+                                                        },
+                                                        icon: const Icon(Icons.add_shopping_cart, size: 14),
+                                                        label: const Text('Tambah', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                                                        style: ElevatedButton.styleFrom(
+                                                          padding: const EdgeInsets.symmetric(vertical: 6),
+                                                          backgroundColor: theme.colorScheme.primary,
+                                                          foregroundColor: Colors.white,
+                                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        GestureDetector(
+                                                          onTap: () => _cartService.decrementQuantity(product),
+                                                          child: Container(
+                                                            width: 28,
+                                                            height: 28,
+                                                            decoration: BoxDecoration(
+                                                              border: Border.all(color: theme.colorScheme.primary),
+                                                              borderRadius: BorderRadius.circular(6),
+                                                            ),
+                                                            child: Icon(
+                                                              qty == 1 ? Icons.delete_outline : Icons.remove,
+                                                              size: 16,
+                                                              color: qty == 1 ? Colors.red : theme.colorScheme.primary,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Text('$qty', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                                        GestureDetector(
+                                                          onTap: () => _cartService.incrementQuantity(product),
+                                                          child: Container(
+                                                            width: 28,
+                                                            height: 28,
+                                                            decoration: BoxDecoration(
+                                                              color: theme.colorScheme.primary,
+                                                              borderRadius: BorderRadius.circular(6),
+                                                            ),
+                                                            child: const Icon(Icons.add, size: 16, color: Colors.white),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    );
+                                            },
                                           ),
                                         ],
                                       ),

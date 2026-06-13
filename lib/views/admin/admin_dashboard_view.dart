@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/database_service.dart';
 import '../../models/product.dart';
+import '../../widgets/product_image_helper.dart';
 import '../auth/login_view.dart';
 import 'add_product_view.dart';
 import 'sales_statistics_view.dart';
@@ -23,18 +24,22 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
     _loadProducts();
   }
 
-  Future<void> _loadProducts() async {
-    setState(() {
-      _isLoading = true;
-    });
-    // Ensure database is initialized
-    await _dbService.init();
-    if (!mounted) return;
-    setState(() {
-      _products = _dbService.getProducts();
-      _isLoading = false;
-    });
-  }
+ Future<void> _loadProducts() async {
+  setState(() {
+    _isLoading = true;
+  });
+
+  await _dbService.init();
+
+  final products = await _dbService.getProducts();
+
+  if (!mounted) return;
+
+  setState(() {
+    _products = products;
+    _isLoading = false;
+  });
+}
 
   void _handleDeleteProduct(Product product) async {
     // Show deletion dialog confirmation
@@ -231,23 +236,20 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
                                 contentPadding: const EdgeInsets.all(8.0),
                                 leading: ClipRRect(
                                   borderRadius: BorderRadius.circular(8.0),
-                                  child: Image.network(
+                                  child: ProductImageHelper.buildProductImage(
                                     product.imageUrl,
                                     width: 60,
                                     height: 60,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      // Fallback on error
-                                      return Container(
-                                        width: 60,
-                                        height: 60,
-                                        color: theme.colorScheme.primaryContainer,
-                                        child: Icon(
-                                          Icons.image_not_supported_outlined,
-                                          color: theme.colorScheme.onPrimaryContainer,
-                                        ),
-                                      );
-                                    },
+                                    errorWidget: Container(
+                                      width: 60,
+                                      height: 60,
+                                      color: theme.colorScheme.primaryContainer,
+                                      child: Icon(
+                                        Icons.image_not_supported_outlined,
+                                        color: theme.colorScheme.onPrimaryContainer,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 title: Text(
