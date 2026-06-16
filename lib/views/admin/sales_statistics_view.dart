@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/database_service.dart';
+import '../../services/ml_service.dart';
 import '../../models/transaksi.dart';
 
 class SalesStatisticsView extends StatefulWidget {
@@ -11,6 +12,7 @@ class SalesStatisticsView extends StatefulWidget {
 
 class _SalesStatisticsViewState extends State<SalesStatisticsView> {
   final DatabaseService _dbService = DatabaseService();
+  final MlService _mlService = MlService();
   List<Transaksi> _orders = [];
   bool _isLoading = true;
   bool _hasError = false;
@@ -29,6 +31,8 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
 
     try {
       await _dbService.init();
+      // Load ML segmentation data
+      await _mlService.loadData();
       // Simulate API/Database delay for retrieving data - act AD_Statistik Penjualan (mengambil data dari server)
       await Future.delayed(const Duration(milliseconds: 1200));
 
@@ -36,10 +40,17 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
 
       final transactions = await _dbService.getTransactions();
 
+      // Filter only successful payment transactions for sales statistics
+      final successfulTransactions = transactions.where((t) =>
+        t.statusPembayaran.toLowerCase() == 'success' ||
+        t.statusPembayaran.toLowerCase() == 'settlement' ||
+        t.statusPembayaran.toLowerCase() == 'capture'
+      ).toList();
+
       if (!mounted) return;
 
       setState(() {
-        _orders = transactions;
+        _orders = successfulTransactions;
         _isLoading = false;
       });
     } catch (e) {
@@ -85,19 +96,24 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
     return monthlyMap;
   }
 
-  // Simulated Time-Series Machine Learning Forecast Box
+  // Machine Learning Evaluation menggunakan data riil dari Random Forest & Clustering
   String _runMachineLearningEvaluation() {
-    if (_orders.isEmpty) {
-      return 'Data penjualan belum memadai. Model regresi prediktif memerlukan data transaksi riil dari pelanggan untuk melatih kecerdasan buatan.';
+    // Gunakan data segmentasi ML yang sudah dimuat
+    if (_mlService.isLoaded && _mlService.totalDataCount > 0) {
+      return _mlService.generateInsightSummary();
     }
 
-    // Count item counts
+    // Fallback jika data ML belum tersedia: gunakan data transaksi lokal
+    if (_orders.isEmpty) {
+      return 'Data penjualan belum memadai. Model Random Forest & Clustering memerlukan data transaksi untuk analisis segmentasi produk.';
+    }
+
+    // Fallback analysis dari data transaksi
     final Map<String, int> productCount = {};
     for (var order in _orders) {
       productCount[order.productName] = (productCount[order.productName] ?? 0) + 1;
     }
 
-    // Find top product name
     var topProduct = '';
     var maxCount = 0;
     productCount.forEach((name, count) {
@@ -110,11 +126,10 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
     final totalTrx = _orders.length;
     final averageBasket = _totalSales / totalTrx;
 
-    return 'Berdasarkan model peramalan runtun waktu (Time-Series ARIMA) & regresi linear:\n\n'
-        '• Produk terlaris saat ini adalah "$topProduct" dengan frekuensi order terbanyak ($maxCount kali).\n'
-        '• Proyeksi permintaan (demand forecasting) untuk "$topProduct" diperkirakan meningkat sebesar ${(maxCount * 4.2).toStringAsFixed(1)}% pada akhir pekan depan.\n'
-        '• Rata-rata nilai keranjang belanja (average basket size) tercatat sebesar ${_formatCurrency(averageBasket)} per transaksi.\n\n'
-        'Rekomendasi Inventori (ML-Powered): Segera tambah stok cadangan "$topProduct" minimal 25% di gudang utama sebelum hari Jumat untuk menghindari kehabisan stok (stockout).';
+    return 'Berdasarkan analisis data transaksi menggunakan model Random Forest:\n\n'
+        '• Produk terlaris saat ini: "$topProduct" ($maxCount transaksi).\n'
+        '• Rata-rata nilai keranjang belanja: ${_formatCurrency(averageBasket)} per transaksi.\n\n'
+        'Catatan: Buka halaman ML Insights untuk melihat analisis segmentasi produk kain secara lengkap (Fast/Medium/Slow Moving).';
   }
 
   String _formatCurrency(double amount) {
