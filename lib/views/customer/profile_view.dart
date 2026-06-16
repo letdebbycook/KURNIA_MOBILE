@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../services/database_service.dart';
 import '../../models/user_profile.dart';
 
@@ -16,7 +18,7 @@ class _ProfileViewState extends State<ProfileView> {
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _urlController = TextEditingController();
+  final _alamatController = TextEditingController();
 
   // Predefined avatar seeds for template chooser
   final List<String> _avatars = [
@@ -27,7 +29,8 @@ class _ProfileViewState extends State<ProfileView> {
   ];
 
   late String _selectedAvatarUrl;
-  bool _useCustomUrl = false;
+  String? _uploadedPhotoBase64;
+  bool _useUploadedPhoto = false;
   bool _isLoading = true;
   bool _isSaving = false;
 
@@ -41,7 +44,7 @@ class _ProfileViewState extends State<ProfileView> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _urlController.dispose();
+    _alamatController.dispose();
     super.dispose();
   }
 
@@ -58,15 +61,27 @@ class _ProfileViewState extends State<ProfileView> {
     setState(() {
       _nameController.text = profile.fullName;
       _phoneController.text = profile.phoneNumber;
+      _alamatController.text = profile.alamat;
       
-      // Determine if image URL is custom or one of the templates
-      if (_avatars.contains(profile.imageUrl)) {
+      // Determine if image URL is an uploaded photo (base64) or one of the templates
+      if (profile.imageUrl.startsWith('data:image/')) {
+        _uploadedPhotoBase64 = profile.imageUrl;
+        _useUploadedPhoto = true;
+        _selectedAvatarUrl = _avatars[0];
+      } else if (_avatars.contains(profile.imageUrl)) {
         _selectedAvatarUrl = profile.imageUrl;
-        _useCustomUrl = false;
+        _useUploadedPhoto = false;
+        _uploadedPhotoBase64 = null;
       } else {
-        _selectedAvatarUrl = profile.imageUrl;
-        _urlController.text = profile.imageUrl;
-        _useCustomUrl = true;
+        // Fallback or previously stored custom URL/path
+        if (profile.imageUrl.isNotEmpty && 
+            (profile.imageUrl.startsWith('http') || profile.imageUrl.startsWith('data:image/'))) {
+          _uploadedPhotoBase64 = profile.imageUrl;
+          _useUploadedPhoto = true;
+        } else {
+          _useUploadedPhoto = false;
+        }
+        _selectedAvatarUrl = _avatars[0];
       }
 
       _isLoading = false;
@@ -85,12 +100,16 @@ class _ProfileViewState extends State<ProfileView> {
 
     final fullName = _nameController.text.trim();
     final phoneNumber = _phoneController.text.trim();
-    final imageUrl = _useCustomUrl ? _urlController.text.trim() : _selectedAvatarUrl;
+    final alamat = _alamatController.text.trim();
+    final imageUrl = _useUploadedPhoto 
+        ? (_uploadedPhotoBase64 ?? '') 
+        : _selectedAvatarUrl;
 
     final updatedProfile = UserProfile(
       username: widget.username,
       fullName: fullName,
       phoneNumber: phoneNumber,
+      alamat: alamat,
       imageUrl: imageUrl,
     );
 
@@ -132,6 +151,111 @@ class _ProfileViewState extends State<ProfileView> {
     }
   }
 
+  ImageProvider? _buildAvatarImageProvider(String imageUrl) {
+    if (imageUrl.isEmpty) return null;
+
+    if (imageUrl.startsWith('data:image/')) {
+      try {
+        final commaIndex = imageUrl.indexOf(',');
+        if (commaIndex != -1) {
+          final base64Str = imageUrl.substring(commaIndex + 1);
+          return MemoryImage(base64Decode(base64Str));
+        }
+      } catch (e) {
+        debugPrint('Error decoding base64 image provider: $e');
+      }
+    }
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return NetworkImage(imageUrl);
+    }
+    return null;
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: source,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 80,
+      );
+
+      if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        if (bytes.length > 2 * 1024 * 1024) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Ukuran gambar terlalu besar. Maksimal 2 MB.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
+        final base64Str = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+        setState(() {
+          _uploadedPhotoBase64 = base64Str;
+          _useUploadedPhoto = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal mengambil gambar: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: const Text('Pilih dari Galeri'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined),
+                title: const Text('Ambil Foto dari Kamera'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              if (_useUploadedPhoto && _uploadedPhotoBase64 != null && _uploadedPhotoBase64!.isNotEmpty)
+                ListTile(
+                  leading: const Icon(Icons.delete_outline, color: Colors.red),
+                  title: const Text('Hapus Foto Unggahan', style: TextStyle(color: Colors.red)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _uploadedPhotoBase64 = null;
+                    });
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -139,6 +263,12 @@ class _ProfileViewState extends State<ProfileView> {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
+
+    final avatarImageProvider = _buildAvatarImageProvider(
+      _useUploadedPhoto
+          ? (_uploadedPhotoBase64 ?? '')
+          : _selectedAvatarUrl,
+    );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
@@ -149,44 +279,47 @@ class _ProfileViewState extends State<ProfileView> {
           children: [
             // Current User Avatar
             Center(
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: theme.colorScheme.primary, width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.primary.withOpacity(0.15),
-                          blurRadius: 12,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      radius: 54,
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      backgroundImage: NetworkImage(
-                        _useCustomUrl ? _urlController.text : _selectedAvatarUrl,
+              child: GestureDetector(
+                onTap: _showImageSourceDialog,
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: theme.colorScheme.primary, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colorScheme.primary.withOpacity(0.15),
+                            blurRadius: 12,
+                            spreadRadius: 2,
+                          ),
+                        ],
                       ),
-                      onBackgroundImageError: (exception, stackTrace) {
-                        // Safe fallback for broken image URLs
-                      },
-                      child: (_useCustomUrl && _urlController.text.isEmpty)
-                          ? Icon(Icons.person, size: 48, color: theme.colorScheme.onPrimaryContainer)
-                          : null,
+                      child: CircleAvatar(
+                        radius: 54,
+                        backgroundColor: theme.colorScheme.primaryContainer,
+                        backgroundImage: avatarImageProvider,
+                        onBackgroundImageError: avatarImageProvider != null
+                            ? (exception, stackTrace) {
+                                // Safe fallback for broken image URLs
+                              }
+                            : null,
+                        child: (_useUploadedPhoto && (_uploadedPhotoBase64 == null || _uploadedPhotoBase64!.isEmpty))
+                            ? Icon(Icons.person, size: 48, color: theme.colorScheme.onPrimaryContainer)
+                            : null,
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 4,
-                    child: CircleAvatar(
-                      radius: 18,
-                      backgroundColor: theme.colorScheme.primary,
-                      child: const Icon(Icons.edit, size: 16, color: Colors.white),
+                    Positioned(
+                      bottom: 0,
+                      right: 4,
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: theme.colorScheme.primary,
+                        child: const Icon(Icons.edit, size: 16, color: Colors.white),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -240,6 +373,33 @@ class _ProfileViewState extends State<ProfileView> {
                 return null;
               },
             ),
+            const SizedBox(height: 16),
+
+            // Alamat Input
+            TextFormField(
+              controller: _alamatController,
+              maxLines: 3,
+              keyboardType: TextInputType.streetAddress,
+              decoration: InputDecoration(
+                labelText: 'Alamat Lengkap',
+                hintText: 'Masukkan alamat lengkap pengiriman...',
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.only(bottom: 40),
+                  child: Icon(Icons.location_on_outlined),
+                ),
+                alignLabelWithHint: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Alamat tidak boleh kosong';
+                }
+                if (value.trim().length < 10) {
+                  return 'Masukkan alamat yang lebih lengkap';
+                }
+                return null;
+              },
+            ),
             const SizedBox(height: 24),
 
             // Photo Selection Area
@@ -253,21 +413,21 @@ class _ProfileViewState extends State<ProfileView> {
               children: [
                 ChoiceChip(
                   label: const Text('Template Avatar'),
-                  selected: !_useCustomUrl,
+                  selected: !_useUploadedPhoto,
                   onSelected: (val) {
                     setState(() {
-                      _useCustomUrl = false;
+                      _useUploadedPhoto = false;
                       _selectedAvatarUrl = _avatars[0];
                     });
                   },
                 ),
                 const SizedBox(width: 12),
                 ChoiceChip(
-                  label: const Text('Kustom URL'),
-                  selected: _useCustomUrl,
+                  label: const Text('Unggah Foto'),
+                  selected: _useUploadedPhoto,
                   onSelected: (val) {
                     setState(() {
-                      _useCustomUrl = true;
+                      _useUploadedPhoto = true;
                     });
                   },
                 ),
@@ -275,8 +435,8 @@ class _ProfileViewState extends State<ProfileView> {
             ),
             const SizedBox(height: 12),
 
-            // Avatar Templates or Custom URL input
-            if (!_useCustomUrl)
+            // Avatar Templates or Camera/Gallery Upload Option
+            if (!_useUploadedPhoto)
               SizedBox(
                 height: 60,
                 child: ListView.builder(
@@ -310,24 +470,65 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
               )
             else
-              TextFormField(
-                controller: _urlController,
-                decoration: InputDecoration(
-                  labelText: 'URL Gambar Profil Web (https://...)',
-                  prefixIcon: const Icon(Icons.link_outlined),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                validator: (value) {
-                  if (_useCustomUrl) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'URL gambar kustom tidak boleh kosong';
-                    }
-                  }
-                  return null;
-                },
-                onChanged: (_) {
-                  setState(() {}); // Refresh preview
-                },
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _pickImage(ImageSource.gallery),
+                          icon: const Icon(Icons.photo_library_outlined),
+                          label: const Text('Galeri Foto'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _pickImage(ImageSource.camera),
+                          icon: const Icon(Icons.camera_alt_outlined),
+                          label: const Text('Kamera'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_uploadedPhotoBase64 != null && _uploadedPhotoBase64!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Center(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _uploadedPhotoBase64 = null;
+                          });
+                        },
+                        icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                        label: const Text(
+                          'Hapus Foto Pilihan',
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.red),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             const SizedBox(height: 36),
 
