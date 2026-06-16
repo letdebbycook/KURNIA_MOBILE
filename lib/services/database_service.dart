@@ -7,6 +7,7 @@ import '../models/user.dart';
 import '../models/product.dart';
 import '../models/transaksi.dart';
 import '../models/user_profile.dart';
+import '../models/cart_item.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
@@ -420,6 +421,7 @@ class DatabaseService {
       username: row['username'],
       fullName: row['nama'] ?? '',
       phoneNumber: row['telepon'] ?? '',
+      alamat: row['alamat'] ?? '',
       imageUrl: row['image_url'] ?? '',
     );
   }
@@ -451,12 +453,14 @@ class DatabaseService {
         SET
         nama=?,
         telepon=?,
+        alamat=?,
         image_url=?
         WHERE username=?
         ''',
         [
           profile.fullName,
           profile.phoneNumber,
+          profile.alamat,
           profile.imageUrl,
           profile.username,
         ],
@@ -502,11 +506,14 @@ class DatabaseService {
           metode_bayar,
           total,
           productName,
-          timestamp
+          timestamp,
+          status_pembayaran,
+          midtrans_order_id,
+          midtrans_redirect_url
         )
         VALUES
         (
-          ?,?,?,?,?
+          ?,?,?,?,?,?,?,?
         )
         ''',
         [
@@ -515,6 +522,9 @@ class DatabaseService {
           transaksi.total,
           transaksi.productName,
           transaksi.timestamp,
+          transaksi.statusPembayaran,
+          transaksi.midtransOrderId,
+          transaksi.midtransRedirectUrl,
         ],
       );
 
@@ -523,6 +533,93 @@ class DatabaseService {
       print(e);
       return false;
     }
+  }
+
+  Future<Map<String, dynamic>?> createMidtransTransaction(
+    Transaksi transaksi,
+    List<CartItem> cartItems,
+  ) async {
+    final Map<String, dynamic> payload = transaksi.toJson();
+    payload['items'] = cartItems.map((item) => {
+      'productName': item.product.name,
+      'price': item.product.price,
+      'quantity': item.quantity,
+    }).toList();
+
+    if (kIsWeb) {
+      try {
+        final response = await http.post(
+          Uri.parse('$_baseUrl?action=create_midtrans_transaction'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(payload),
+        );
+        if (response.statusCode == 200) {
+          final res = jsonDecode(response.body);
+          if (res['status'] == 'success') {
+            return res;
+          }
+        }
+      } catch (e) {
+        print('Web create midtrans transaction error: $e');
+      }
+      return null;
+    }
+
+    // Native implementation calling PHP bridge
+    try {
+      final hosts = ['127.0.0.1', '10.0.2.2', '192.168.18.18'];
+      for (final host in hosts) {
+        try {
+          final response = await http.post(
+            Uri.parse('http://$host/kurnia_api/api.php?action=create_midtrans_transaction'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(payload),
+          ).timeout(const Duration(seconds: 2));
+          if (response.statusCode == 200) {
+            final res = jsonDecode(response.body);
+            if (res['status'] == 'success') {
+              return res;
+            }
+          }
+        } catch (_) {}
+      }
+    } catch (e) {
+      print('Native create midtrans transaction error: $e');
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> checkMidtransStatus(String orderId) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.get(
+          Uri.parse('$_baseUrl?action=check_midtrans_status&order_id=$orderId'),
+        );
+        if (response.statusCode == 200) {
+          return jsonDecode(response.body);
+        }
+      } catch (e) {
+        print('Web check midtrans status error: $e');
+      }
+      return null;
+    }
+
+    try {
+      final hosts = ['127.0.0.1', '10.0.2.2', '192.168.18.18'];
+      for (final host in hosts) {
+        try {
+          final response = await http.get(
+            Uri.parse('http://$host/kurnia_api/api.php?action=check_midtrans_status&order_id=$orderId'),
+          ).timeout(const Duration(seconds: 2));
+          if (response.statusCode == 200) {
+            return jsonDecode(response.body);
+          }
+        } catch (_) {}
+      }
+    } catch (e) {
+      print('Native check midtrans status error: $e');
+    }
+    return null;
   }
 
   Future<List<Transaksi>> getTransactions() async {
@@ -541,9 +638,10 @@ class DatabaseService {
 
     final result = await conn.query(
       '''
-      SELECT *
-      FROM transaksi
-      ORDER BY id_transaksi DESC
+      SELECT t.*, u.nama AS user_nama, u.telepon AS user_telepon, u.alamat AS user_alamat
+      FROM transaksi t
+      LEFT JOIN users u ON t.id_user = u.id_user
+      ORDER BY t.id_transaksi DESC
       ''',
     );
 
@@ -553,12 +651,136 @@ class DatabaseService {
         idUser: row['id_user'],
         metodeBayar: row['metode_bayar'],
         total: (row['total'] as num).toDouble(),
-        productName: row['productName'],
-        timestamp: DateTime.parse(
-          row['timestamp'].toString(),
-        ),
+        productName: row['productName'] ?? '',
+        timestamp: DateTime.parse(row['timestamp'].toString()),
+        statusPembayaran: row['status_pembayaran'] ?? 'pending',
+        statusPesanan: row['status_pesanan'] ?? 'pending',
+        midtransOrderId: row['midtrans_order_id'] ?? '',
+        midtransRedirectUrl: row['midtrans_redirect_url'] ?? '',
+        userNama: row['user_nama'],
+        userTelepon: row['user_telepon'],
+        userAlamat: row['user_alamat'],
       );
     }).toList();
+  }
+
+  Future<List<Transaksi>> getTransactionsByUserId(int idUser) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.get(Uri.parse('$_baseUrl?action=get_transactions_by_user&id_user=$idUser'));
+        if (response.statusCode == 200) {
+          final List<dynamic> list = jsonDecode(response.body);
+          return list.map((item) => Transaksi.fromJson(item)).toList();
+        }
+      } catch (e) {
+        print('Web get transactions by user error: $e');
+      }
+      return [];
+    }
+
+    final result = await conn.query(
+      '''
+      SELECT t.*, u.nama AS user_nama, u.telepon AS user_telepon, u.alamat AS user_alamat
+      FROM transaksi t
+      LEFT JOIN users u ON t.id_user = u.id_user
+      WHERE t.id_user = ?
+      ORDER BY t.id_transaksi DESC
+      ''',
+      [idUser],
+    );
+
+    return result.map((row) {
+      return Transaksi(
+        idTransaksi: row['id_transaksi'],
+        idUser: row['id_user'],
+        metodeBayar: row['metode_bayar'],
+        total: (row['total'] as num).toDouble(),
+        productName: row['productName'] ?? '',
+        timestamp: DateTime.parse(row['timestamp'].toString()),
+        statusPembayaran: row['status_pembayaran'] ?? 'pending',
+        statusPesanan: row['status_pesanan'] ?? 'pending',
+        midtransOrderId: row['midtrans_order_id'] ?? '',
+        midtransRedirectUrl: row['midtrans_redirect_url'] ?? '',
+        userNama: row['user_nama'],
+        userTelepon: row['user_telepon'],
+        userAlamat: row['user_alamat'],
+      );
+    }).toList();
+  }
+
+  Future<bool> updateOrderStatus(int idTransaksi, String statusPesanan) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.post(
+          Uri.parse('$_baseUrl?action=update_order_status'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'id_transaksi': idTransaksi,
+            'status_pesanan': statusPesanan,
+          }),
+        );
+        if (response.statusCode == 200) {
+          final res = jsonDecode(response.body);
+          return res['status'] == 'success';
+        }
+      } catch (e) {
+        print('Web update order status error: $e');
+      }
+      return false;
+    }
+
+    try {
+      await conn.query(
+        '''
+        UPDATE transaksi
+        SET status_pesanan = ?
+        WHERE id_transaksi = ?
+        ''',
+        [statusPesanan, idTransaksi],
+      );
+      return true;
+    } catch (e) {
+      print('Native update order status error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deleteTransaction({int? idTransaksi, String? midtransOrderId}) async {
+    final orderIdParam = midtransOrderId ?? '';
+    final idParam = idTransaksi ?? 0;
+    
+    if (kIsWeb) {
+      try {
+        final response = await http.get(
+          Uri.parse('$_baseUrl?action=delete_transaction&id=$idParam&order_id=$orderIdParam'),
+        );
+        if (response.statusCode == 200) {
+          final res = jsonDecode(response.body);
+          return res['status'] == 'success';
+        }
+      } catch (e) {
+        print('Web delete transaction error: $e');
+      }
+      return false;
+    }
+
+    try {
+      if (midtransOrderId != null && midtransOrderId.isNotEmpty) {
+        await conn.query(
+          "DELETE FROM transaksi WHERE midtrans_order_id = ? AND status_pembayaran = 'pending'",
+          [midtransOrderId],
+        );
+      } else {
+        await conn.query(
+          "DELETE FROM transaksi WHERE id_transaksi = ? AND status_pembayaran = 'pending'",
+          [idTransaksi],
+        );
+      }
+      return true;
+    } catch (e) {
+      print('Native delete transaction error: $e');
+      return false;
+    }
   }
 
   // ======================================================
@@ -568,13 +790,19 @@ class DatabaseService {
   Future<double> getTotalPenjualan() async {
     if (kIsWeb) {
       final list = await getTransactions();
-      return list.fold<double>(0.0, (sum, item) => sum + item.total);
+      return list
+          .where((t) =>
+              t.statusPembayaran.toLowerCase() == 'success' ||
+              t.statusPembayaran.toLowerCase() == 'settlement' ||
+              t.statusPembayaran.toLowerCase() == 'capture')
+          .fold<double>(0.0, (sum, item) => sum + item.total);
     }
 
     final result = await conn.query(
       '''
       SELECT SUM(total) total
       FROM transaksi
+      WHERE status_pembayaran IN ('success', 'settlement', 'capture')
       ''',
     );
 
@@ -586,13 +814,19 @@ class DatabaseService {
   Future<int> getJumlahTransaksi() async {
     if (kIsWeb) {
       final list = await getTransactions();
-      return list.length;
+      return list
+          .where((t) =>
+              t.statusPembayaran.toLowerCase() == 'success' ||
+              t.statusPembayaran.toLowerCase() == 'settlement' ||
+              t.statusPembayaran.toLowerCase() == 'capture')
+          .length;
     }
 
     final result = await conn.query(
       '''
       SELECT COUNT(*) jumlah
       FROM transaksi
+      WHERE status_pembayaran IN ('success', 'settlement', 'capture')
       ''',
     );
 
