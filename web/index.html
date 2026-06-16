@@ -31,6 +31,32 @@
 
   <title>kurnia_ecommerce</title>
   <link rel="manifest" href="manifest.json">
+  <script type="text/javascript"
+    src="https://app.sandbox.midtrans.com/snap/snap.js"
+    data-client-key="Mid-client-pTC4u-SqT_lG3wLV"></script>
+  <script type="text/javascript">
+    window.payWithMidtrans = function(snapToken) {
+      if (typeof snap === "undefined") {
+        console.error("Midtrans Snap is not loaded.");
+        alert("Midtrans Snap belum siap. Silakan coba lagi.");
+        return;
+      }
+      snap.pay(snapToken, {
+        onSuccess: function(result){
+          console.log('success', result);
+        },
+        onPending: function(result){
+          console.log('pending', result);
+        },
+        onError: function(result){
+          console.log('error', result);
+        }
+      });
+    }
+    window.redirectToUrl = function(url) {
+      window.location.href = url;
+    }
+  </script>
 </head>
 <body>
   <!--
