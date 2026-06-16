@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../services/database_service.dart';
 import '../../services/cart_service.dart';
+import '../../services/wishlist_service.dart';
 import '../../models/product.dart';
 import '../../widgets/product_image_helper.dart';
 import '../auth/login_view.dart';
 import 'cart_view.dart';
 import 'profile_view.dart';
+import 'order_history_view.dart';
+import 'wishlist_view.dart';
 
 class CustomerDashboardView extends StatefulWidget {
   final String username;
@@ -19,6 +22,7 @@ class CustomerDashboardView extends StatefulWidget {
 class _CustomerDashboardViewState extends State<CustomerDashboardView> {
   final DatabaseService _dbService = DatabaseService();
   final CartService _cartService = CartService();
+  final WishlistService _wishlistService = WishlistService();
   List<Product> _products = [];
   List<Product> _filteredProducts = [];
   bool _isLoading = true;
@@ -221,7 +225,13 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
     final theme = Theme.of(context);
 
     // Title text changes based on current tab
-    final title = _currentIndex == 0 ? 'Katalog Toko Pelanggan' : 'Profil Saya';
+    final title = _currentIndex == 0
+        ? 'Katalog Toko Pelanggan'
+        : _currentIndex == 1
+            ? 'Wishlist Saya'
+            : _currentIndex == 2
+                ? 'Riwayat Pesanan'
+                : 'Profil Saya';
 
     return Scaffold(
       appBar: AppBar(
@@ -302,7 +312,24 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
       ),
       body: _currentIndex == 0
           ? _buildStorefrontTab(theme)
-          : ProfileView(username: widget.username),
+          : _currentIndex == 1
+              ? WishlistView(
+                  onNavigateToStorefront: () {
+                    setState(() {
+                      _currentIndex = 0;
+                    });
+                  },
+                )
+              : _currentIndex == 2
+                  ? OrderHistoryView(
+                      idUser: widget.idUser,
+                      onNavigateToStorefront: () {
+                        setState(() {
+                          _currentIndex = 0;
+                        });
+                      },
+                    )
+                  : ProfileView(username: widget.username),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -312,13 +339,34 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
         },
         selectedItemColor: theme.colorScheme.primary,
         unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
+        type: BottomNavigationBarType.fixed,
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.storefront_outlined),
             activeIcon: Icon(Icons.storefront),
             label: 'Belanja',
           ),
           BottomNavigationBarItem(
+            icon: ListenableBuilder(
+              listenable: _wishlistService,
+              builder: (context, _) {
+                final count = _wishlistService.totalItems;
+                return Badge(
+                  isLabelVisible: count > 0,
+                  label: Text('$count', style: const TextStyle(fontSize: 9)),
+                  child: const Icon(Icons.favorite_outline),
+                );
+              },
+            ),
+            activeIcon: const Icon(Icons.favorite),
+            label: 'Wishlist',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.receipt_long_outlined),
+            activeIcon: Icon(Icons.receipt_long),
+            label: 'Riwayat',
+          ),
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
             label: 'Profil',
@@ -424,21 +472,77 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
-                                    // Image
+                                    // Image with wishlist heart overlay
                                     Expanded(
-                                      child: ClipRRect(
-                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                                        child: ProductImageHelper.buildProductImage(
-                                          product.imageUrl,
-                                          fit: BoxFit.cover,
-                                          errorWidget: Container(
-                                            color: theme.colorScheme.primaryContainer,
-                                            child: Icon(
-                                              Icons.image_not_supported_outlined,
-                                              color: theme.colorScheme.onPrimaryContainer,
+                                      child: Stack(
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                                            child: SizedBox(
+                                              width: double.infinity,
+                                              child: ProductImageHelper.buildProductImage(
+                                                product.imageUrl,
+                                                fit: BoxFit.cover,
+                                                errorWidget: Container(
+                                                  color: theme.colorScheme.primaryContainer,
+                                                  child: Icon(
+                                                    Icons.image_not_supported_outlined,
+                                                    color: theme.colorScheme.onPrimaryContainer,
+                                                  ),
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        ),
+                                          // Wishlist heart button
+                                          Positioned(
+                                            top: 6,
+                                            right: 6,
+                                            child: ListenableBuilder(
+                                              listenable: _wishlistService,
+                                              builder: (context, _) {
+                                                final isWished = _wishlistService.containsProduct(product);
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    final added = _wishlistService.toggleWishlist(product);
+                                                    ScaffoldMessenger.of(context).clearSnackBars();
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          added
+                                                              ? '${product.name} ditambahkan ke wishlist!'
+                                                              : '${product.name} dihapus dari wishlist.',
+                                                        ),
+                                                        behavior: SnackBarBehavior.floating,
+                                                        backgroundColor: added ? Colors.pink.shade400 : Colors.grey.shade600,
+                                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                                        duration: const Duration(seconds: 1),
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: Container(
+                                                    width: 30,
+                                                    height: 30,
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white.withValues(alpha: 0.9),
+                                                      shape: BoxShape.circle,
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Colors.black.withValues(alpha: 0.1),
+                                                          blurRadius: 4,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child: Icon(
+                                                      isWished ? Icons.favorite : Icons.favorite_outline,
+                                                      size: 16,
+                                                      color: isWished ? Colors.pink.shade400 : Colors.grey.shade500,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                     // Content details

@@ -4,7 +4,9 @@ import '../../models/product.dart';
 import '../../widgets/product_image_helper.dart';
 import '../auth/login_view.dart';
 import 'add_product_view.dart';
+import 'admin_orders_view.dart';
 import 'sales_statistics_view.dart';
+import 'ml_insights_view.dart';
 
 class AdminDashboardView extends StatefulWidget {
   const AdminDashboardView({super.key});
@@ -147,6 +149,28 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
         actions: [
+          // Order Management Button
+          IconButton(
+            icon: const Icon(Icons.assignment_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AdminOrdersView()),
+              );
+            },
+            tooltip: 'Kelola Pesanan',
+          ),
+          // ML Insights Button
+          IconButton(
+            icon: const Icon(Icons.psychology_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MlInsightsView()),
+              );
+            },
+            tooltip: 'ML Insights',
+          ),
           // Sales Stats Button
           IconButton(
             icon: const Icon(Icons.bar_chart_outlined),

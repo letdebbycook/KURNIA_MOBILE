@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:js' as js;
+import 'package:flutter/foundation.dart';
 import '../../models/cart_item.dart';
 import '../../models/transaksi.dart';
 import '../../services/database_service.dart';
@@ -23,18 +26,13 @@ class _CheckoutViewState extends State<CheckoutView> {
   final DatabaseService _dbService = DatabaseService();
   final CartService _cartService = CartService();
 
-  String _selectedPayment = 'Bank Central Asia (BCA)';
+  String _selectedPayment = 'Midtrans (Pembayaran Online)';
   bool _isProcessing = false;
   bool _isSuccess = false;
   List<Transaksi> _savedOrders = [];
 
   final List<Map<String, String>> _banks = [
-    {'name': 'Bank Central Asia (BCA)', 'code': 'BCA', 'account': '8839-0129-3847-001'},
-    {'name': 'Bank Mandiri', 'code': 'MANDIRI', 'account': '137-00-29183-948'},
-    {'name': 'Bank Rakyat Indonesia (BRI)', 'code': 'BRI', 'account': '0029-01-002938-30-2'},
-    {'name': 'Bank Negara Indonesia (BNI)', 'code': 'BNI', 'account': '0239-4829-10'},
-    {'name': 'GoPay / OVO / DANA', 'code': 'E-WALLET', 'account': '0812-3456-7890'},
-    {'name': 'COD (Bayar di Tempat)', 'code': 'COD', 'account': '-'},
+    {'name': 'Midtrans (Pembayaran Online)', 'code': 'MIDTRANS', 'account': '-'},
   ];
 
   double get _totalPrice => widget.cartItems.fold(0.0, (sum, item) => sum + item.subtotal);
@@ -55,35 +53,93 @@ class _CheckoutViewState extends State<CheckoutView> {
     return 'Rp ${buffer.toString().split('').reversed.join('')}';
   }
 
+  void _openPayment(String redirectUrl) {
+    if (kIsWeb) {
+      String? snapToken;
+      try {
+        final uri = Uri.parse(redirectUrl);
+        if (uri.pathSegments.isNotEmpty) {
+          snapToken = uri.pathSegments.last;
+        }
+      } catch (_) {}
+
+      if (snapToken != null && snapToken.isNotEmpty) {
+        try {
+          js.context.callMethod('payWithMidtrans', [snapToken]);
+          return;
+        } catch (e) {
+          debugPrint('JS payWithMidtrans error, falling back: $e');
+        }
+      }
+
+      // Fallback 1: Use window.redirectToUrl
+      try {
+        js.context.callMethod('redirectToUrl', [redirectUrl]);
+        return;
+      } catch (e) {
+        debugPrint('JS redirectToUrl error, falling back: $e');
+      }
+
+      // Fallback 2: Direct URL Launch (popup window)
+      try {
+        final uri = Uri.parse(redirectUrl);
+        launchUrl(uri, mode: LaunchMode.externalApplication);
+      } catch (e) {
+        debugPrint('Launch URL error fallback: $e');
+      }
+    } else {
+      final uri = Uri.parse(redirectUrl);
+      launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   Future<void> _handleCheckout() async {
     setState(() => _isProcessing = true);
 
     await _dbService.init();
-    await Future.delayed(const Duration(seconds: 2));
+    // Short delay for UI feedback feel
+    await Future.delayed(const Duration(milliseconds: 300));
 
-    final bankData = _banks.firstWhere((b) => b['name'] == _selectedPayment);
-    final metodeBayar = bankData['code'] == 'COD'
-        ? 'COD (Bayar di Tempat)'
-        : 'Transfer ${bankData['code']}';
-
+    final metodeBayar = 'Midtrans';
     final now = DateTime.now();
     final List<Transaksi> savedOrders = [];
 
-    // Save one transaction per cart item (preserving productName per item)
-    for (final cartItem in widget.cartItems) {
-      for (int i = 0; i < cartItem.quantity; i++) {
-        final transaksi = Transaksi(
-          idUser: widget.idUser,
-          metodeBayar: metodeBayar,
-          total: cartItem.product.price,
-          productName: cartItem.product.name,
-          timestamp: now,
-        );
-        final success = await _dbService.saveTransaksi(transaksi);
-        if (success) {
-          savedOrders.add(transaksi);
+    // Midtrans Sandbox SNAP Payment Gateway Integration
+    try {
+      final dummyTransaksi = Transaksi(
+        idUser: widget.idUser,
+        metodeBayar: metodeBayar,
+        total: _totalPrice,
+        productName: widget.cartItems.map((e) => e.product.name).join(', '),
+        timestamp: now,
+      );
+
+      final res = await _dbService.createMidtransTransaction(dummyTransaksi, widget.cartItems);
+      if (res != null && res['midtrans_redirect_url'] != null) {
+        final redirectUrl = res['midtrans_redirect_url'] as String;
+
+        // Reconstruct transaction lists to show success info
+        final orderId = res['midtrans_order_id'] as String;
+        for (final cartItem in widget.cartItems) {
+          for (int i = 0; i < cartItem.quantity; i++) {
+            savedOrders.add(Transaksi(
+              idUser: widget.idUser,
+              metodeBayar: metodeBayar,
+              total: cartItem.product.price,
+              productName: cartItem.product.name,
+              timestamp: now,
+              statusPembayaran: 'pending',
+              midtransOrderId: orderId,
+              midtransRedirectUrl: redirectUrl,
+            ));
+          }
         }
+
+        // Launch the payment redirection page
+        _openPayment(redirectUrl);
       }
+    } catch (e) {
+      debugPrint('Midtrans Snap initiation error: $e');
     }
 
     if (!mounted) return;
@@ -100,7 +156,7 @@ class _CheckoutViewState extends State<CheckoutView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Gagal menyimpan transaksi. Periksa koneksi database.'),
+            content: Text('Gagal memproses transaksi. Periksa koneksi internet.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -149,7 +205,7 @@ class _CheckoutViewState extends State<CheckoutView> {
   }
 
   Widget _buildCheckoutForm(ThemeData theme) {
-    final bankData = _banks.firstWhere((b) => b['name'] == _selectedPayment);
+    // Midtrans only, no bankData dropdown selection needed
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
@@ -242,65 +298,45 @@ class _CheckoutViewState extends State<CheckoutView> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
+              child: Row(
                 children: [
-                  DropdownButtonFormField<String>(
-                    value: _selectedPayment,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      prefixIcon: const Icon(Icons.payment_outlined),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    items: _banks.map((bank) {
-                      return DropdownMenuItem<String>(
-                        value: bank['name'],
-                        child: Text(bank['name']!, style: const TextStyle(fontSize: 14)),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) setState(() => _selectedPayment = value);
-                    },
+                    child: Icon(Icons.security, color: theme.colorScheme.primary, size: 24),
                   ),
-                  if (bankData['code'] != 'COD') ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.amber.shade200),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${bankData['code'] == 'E-WALLET' ? 'Nomor E-Wallet' : 'No. Rekening'} ${bankData['code']}:',
-                            style: TextStyle(fontWeight: FontWeight.w600, color: Colors.amber.shade900, fontSize: 12),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(bankData['account']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                              Text(
-                                _formatCurrency(_totalPrice),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.secondary,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'a.n. PT KURNIA MOBILE INDONESIA',
-                            style: TextStyle(color: Colors.grey.shade700, fontSize: 11),
-                          ),
-                        ],
-                      ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Midtrans (Pembayaran Online)',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Mendukung Transfer Bank, GoPay, ShopeePay, Alfamart, dll.',
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Text(
+                      'SANDBOX',
+                      style: TextStyle(color: Colors.blue.shade800, fontWeight: FontWeight.bold, fontSize: 9),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -371,6 +407,8 @@ class _CheckoutViewState extends State<CheckoutView> {
   Widget _buildSuccessView(ThemeData theme) {
     final now = DateTime.now();
     final totalSaved = _savedOrders.length;
+    final isPendingPayment = _savedOrders.isNotEmpty &&
+        _savedOrders.any((t) => t.statusPembayaran == 'pending');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -378,30 +416,36 @@ class _CheckoutViewState extends State<CheckoutView> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 16),
-          // Success animation placeholder
+          // Success/Pending animation placeholder
           Center(
             child: Container(
               width: 90,
               height: 90,
-              decoration: const BoxDecoration(
-                color: Colors.green,
+              decoration: BoxDecoration(
+                color: isPendingPayment ? Colors.amber : Colors.green,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check, size: 52, color: Colors.white),
+              child: Icon(
+                isPendingPayment ? Icons.payment_outlined : Icons.check,
+                size: 48,
+                color: Colors.white,
+              ),
             ),
           ),
           const SizedBox(height: 20),
           Text(
-            'Pembayaran Berhasil!',
+            isPendingPayment ? 'Instruksi Pembayaran Dibuka!' : 'Pesanan Berhasil Dibuat!',
             textAlign: TextAlign.center,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.green.shade700,
+              color: isPendingPayment ? Colors.amber.shade800 : Colors.green.shade700,
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            '$totalSaved transaksi telah disimpan ke database.',
+            isPendingPayment
+                ? 'Silakan selesaikan pembayaran pada halaman Midtrans Sandbox yang baru saja dibuka.'
+                : '$totalSaved transaksi telah sukses disimpan ke database.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
           ),
@@ -436,6 +480,8 @@ class _CheckoutViewState extends State<CheckoutView> {
                   _buildReceiptRow('Waktu', '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} WIB'),
                   _buildReceiptRow('Metode Bayar', _banks.firstWhere((b) => b['name'] == _selectedPayment)['code']!),
                   _buildReceiptRow('ID Pelanggan', 'USER_00${widget.idUser}'),
+                  if (isPendingPayment && _savedOrders.isNotEmpty)
+                    _buildReceiptRow('Order ID Midtrans', _savedOrders.first.midtransOrderId),
                   const SizedBox(height: 12),
                   const Divider(),
                   const SizedBox(height: 8),
@@ -478,18 +524,27 @@ class _CheckoutViewState extends State<CheckoutView> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade50,
+                        color: isPendingPayment ? Colors.amber.shade50 : Colors.green.shade50,
                         borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: Colors.green.shade200),
+                        border: Border.all(color: isPendingPayment ? Colors.amber.shade200 : Colors.green.shade200),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.verified, size: 16, color: Colors.green.shade700),
+                          Icon(
+                            isPendingPayment ? Icons.schedule : Icons.verified,
+                            size: 16,
+                            color: isPendingPayment ? Colors.amber.shade800 : Colors.green.shade700,
+                          ),
                           const SizedBox(width: 6),
                           Text(
-                            'LUNAS / SUKSES',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green.shade800, fontSize: 12, letterSpacing: 0.5),
+                            isPendingPayment ? 'PENDING / BELUM BAYAR' : 'LUNAS / SUKSES',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: isPendingPayment ? Colors.amber.shade900 : Colors.green.shade800,
+                              fontSize: 12,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ],
                       ),
@@ -500,6 +555,114 @@ class _CheckoutViewState extends State<CheckoutView> {
             ),
           ),
           const SizedBox(height: 28),
+
+          if (isPendingPayment && _savedOrders.isNotEmpty) ...[
+            ElevatedButton.icon(
+              onPressed: () async {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(child: CircularProgressIndicator()),
+                );
+                
+                final orderId = _savedOrders.first.midtransOrderId;
+                final res = await _dbService.checkMidtransStatus(orderId);
+                
+                if (mounted) Navigator.pop(context);
+                
+                if (res != null && res['status'] == 'success') {
+                  final localStatus = res['local_status'] as String;
+                  if (localStatus == 'success') {
+                    setState(() {
+                      _savedOrders = _savedOrders.map((t) => Transaksi(
+                        idTransaksi: t.idTransaksi,
+                        idUser: t.idUser,
+                        metodeBayar: t.metodeBayar,
+                        total: t.total,
+                        productName: t.productName,
+                        timestamp: t.timestamp,
+                        statusPembayaran: 'success',
+                        midtransOrderId: t.midtransOrderId,
+                        midtransRedirectUrl: t.midtransRedirectUrl,
+                      )).toList();
+                    });
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Pembayaran berhasil dikonfirmasi!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } else {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Pembayaran belum diterima. Status: ${res['transaction_status']}'),
+                          backgroundColor: Colors.amber,
+                        ),
+                      );
+                    }
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Gagal memeriksa status pembayaran. Coba lagi.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              icon: const Icon(Icons.check_circle_outline),
+              label: const Text('SELESAI / CEK STATUS PEMBAYARAN', style: TextStyle(fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          if (isPendingPayment && _savedOrders.isNotEmpty && _savedOrders.first.midtransRedirectUrl.isNotEmpty) ...[
+            ElevatedButton.icon(
+              onPressed: () {
+                _openPayment(_savedOrders.first.midtransRedirectUrl);
+              },
+              icon: const Icon(Icons.payment_outlined),
+              label: const Text('BUKA KEMBALI HALAMAN BAYAR', style: TextStyle(fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                backgroundColor: Colors.amber.shade700,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          if (!isPendingPayment) ...[
+            ElevatedButton.icon(
+              onPressed: () {
+                final uri = Uri.parse('https://dashboard.sandbox.midtrans.com/');
+                launchUrl(uri, mode: LaunchMode.externalApplication);
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              icon: const Icon(Icons.dashboard_outlined),
+              label: const Text('SELESAI & MASUK KE DASHBOARD MIDTRANS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                backgroundColor: Colors.green.shade700,
+                foregroundColor: Colors.white,
+                elevation: 3,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
 
           ElevatedButton(
             onPressed: () {
