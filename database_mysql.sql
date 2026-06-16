@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(100) NOT NULL,
   nama VARCHAR(64) NOT NULL,
   telepon VARCHAR(20) NOT NULL,
+  alamat TEXT NULL,
   image_url LONGTEXT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -37,6 +38,10 @@ CREATE TABLE IF NOT EXISTS transaksi (
   total DECIMAL(16, 2) NOT NULL,
   productName VARCHAR(100) NOT NULL,
   timestamp DATETIME NOT NULL,
+  status_pembayaran VARCHAR(20) DEFAULT 'pending',
+  status_pesanan VARCHAR(20) DEFAULT 'pending',
+  midtrans_order_id VARCHAR(100) NULL,
+  midtrans_redirect_url TEXT NULL,
   FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

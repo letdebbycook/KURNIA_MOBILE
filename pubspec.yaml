@@ -23,6 +23,12 @@ dependencies:
   # Image Picker
   image_picker: ^1.1.2
 
+  # URL Launcher to open payment page
+  url_launcher: ^6.3.0
+
+  # CSV Parser for ML Data
+  csv: ^6.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -32,12 +38,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # assets:
-  #   - assets/images/
-
-  # fonts:
-  #   - family: Poppins
-  #     fonts:
-  #       - asset: assets/fonts/Poppins-Regular.ttf
-  #       - asset: assets/fonts/Poppins-Bold.ttf
-  #         weight: 700
+  assets:
+    - assets/ml/
