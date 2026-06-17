@@ -1,0 +1,428 @@
+PFco_Code,segment,risk_category,priority,action,current_stock_kg,predicted_need_kg,safety_stock_kg,restock_qty_kg,turnover_ratio,stockout_pct,overstock_pct,suggestion
+115,medium moving,overstock,SEDANG,KURANGI STOK,111.02,0.0,199.5,0.0,5.25,0.0,0.0,Stok berlebih (111 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+119,slow moving,overstock,RENDAH,KURANGI STOK,65.22,0.0,41.97,0.0,0.71,0.0,0.0,Stok berlebih (65 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+123,slow moving,overstock,RENDAH,KURANGI STOK,152.64,0.0,87.55,0.0,2.16,0.0,0.0,Stok berlebih (153 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+124,slow moving,overstock,RENDAH,KURANGI STOK,1399.55,0.0,270.99,0.0,0.7,0.0,66.67,Stok berlebih (1400 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+125,slow moving,overstock,RENDAH,KURANGI STOK,120.56,0.0,71.24,0.0,0.96,0.0,0.0,Stok berlebih (121 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+126,slow moving,overstock,RENDAH,KURANGI STOK,241.65,0.0,56.89,0.0,0.83,0.0,0.0,Stok berlebih (242 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+127,slow moving,overstock,RENDAH,KURANGI STOK,281.36,0.0,53.4,0.0,0.61,0.0,0.0,Stok berlebih (281 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+139,slow moving,overstock,RENDAH,KURANGI STOK,3340.09,0.0,949.55,0.0,1.13,0.0,0.0,Stok berlebih (3340 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+145,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,0.0,643.32,239.44,882.76,1.29,31.25,0.0,Stok kurang (0 Kg vs kebutuhan 643 Kg). Segera restock minimal 643 Kg + safety stock 239 Kg.
+146,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,142.95,1251.55,292.24,1400.84,0.55,6.98,9.3,Stok kurang (143 Kg vs kebutuhan 1252 Kg). Segera restock minimal 1109 Kg + safety stock 292 Kg.
+148,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,22.26,37.6,11.48,41.36,0.47,0.0,5.41,Stok mendekati batas minimum. Siapkan order pembelian 38 Kg untuk periode berikutnya.
+155,slow moving,optimal,RENDAH,PERTAHANKAN,1194.56,814.88,634.76,814.88,0.46,0.0,26.19,Stok dalam kondisi optimal (1195 Kg). Pertahankan pola restocking saat ini.
+158,fast moving,overstock,TINGGI,KURANGI STOK,12614.54,6227.16,2001.96,0.0,0.47,0.0,88.37,Stok berlebih (12615 Kg vs kebutuhan 6227 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+160,slow moving,optimal,RENDAH,PERTAHANKAN,2312.97,2390.24,309.47,2390.24,0.56,0.0,25.58,Stok dalam kondisi optimal (2313 Kg). Pertahankan pola restocking saat ini.
+161,slow moving,optimal,RENDAH,PERTAHANKAN,204.9,247.95,88.9,247.95,0.56,7.32,7.32,Stok dalam kondisi optimal (205 Kg). Pertahankan pola restocking saat ini.
+164,medium moving,overstock,SEDANG,KURANGI STOK,23.84,0.0,22.77,0.0,4.61,33.33,0.0,Stok berlebih (24 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+167,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,119.89,449.19,38.86,368.16,0.37,2.5,20.0,Stok kurang (120 Kg vs kebutuhan 449 Kg). Segera restock minimal 329 Kg + safety stock 39 Kg.
+168,slow moving,overstock,RENDAH,KURANGI STOK,461.69,0.0,136.62,0.0,1.25,0.0,0.0,Stok berlebih (462 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+172,slow moving,overstock,RENDAH,KURANGI STOK,459.23,0.0,75.37,0.0,0.8,0.0,0.0,Stok berlebih (459 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+174,slow moving,overstock,RENDAH,KURANGI STOK,1559.4,1606.16,263.31,46.76,0.75,4.17,33.33,Stok berlebih (1559 Kg vs kebutuhan 1606 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+175,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,5.12,2707.62,487.02,3189.52,1.57,25.58,9.3,Stok kurang (5 Kg vs kebutuhan 2708 Kg). Segera restock minimal 2702 Kg + safety stock 487 Kg.
+176,slow moving,overstock,RENDAH,KURANGI STOK,59.81,0.0,31.65,0.0,2.04,0.0,0.0,Stok berlebih (60 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+177,slow moving,overstock,RENDAH,KURANGI STOK,826.96,378.38,76.23,0.0,0.88,4.88,36.59,Stok berlebih (827 Kg vs kebutuhan 378 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+178,slow moving,overstock,RENDAH,KURANGI STOK,483.57,0.0,62.81,0.0,0.63,0.0,100.0,Stok berlebih (484 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+179,fast moving,overstock,TINGGI,KURANGI STOK,23611.15,8232.15,1487.84,0.0,0.3,0.0,86.05,Stok berlebih (23611 Kg vs kebutuhan 8232 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+181,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,44.22,484.29,169.19,609.26,0.99,25.0,0.0,Stok kurang (44 Kg vs kebutuhan 484 Kg). Segera restock minimal 440 Kg + safety stock 169 Kg.
+183,medium moving,overstock,SEDANG,KURANGI STOK,39.66,0.0,35.69,0.0,3.07,0.0,0.0,Stok berlebih (40 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+187,slow moving,overstock,RENDAH,KURANGI STOK,1949.77,3103.69,597.46,1153.92,0.43,0.0,35.0,Stok berlebih (1950 Kg vs kebutuhan 3104 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+188,slow moving,overstock,RENDAH,KURANGI STOK,797.36,357.45,76.92,0.0,0.35,0.0,82.35,Stok berlebih (797 Kg vs kebutuhan 357 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+191,slow moving,overstock,RENDAH,KURANGI STOK,248.38,0.0,69.2,0.0,1.01,0.0,0.0,Stok berlebih (248 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+193,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,194.32,715.28,114.3,635.26,2.96,34.88,0.0,Stok kurang (194 Kg vs kebutuhan 715 Kg). Segera restock minimal 521 Kg + safety stock 114 Kg.
+195,slow moving,overstock,RENDAH,KURANGI STOK,1681.96,0.0,1002.19,0.0,1.75,0.0,0.0,Stok berlebih (1682 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+197,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,299.78,563.2,110.19,619.52,0.5,0.0,0.0,Stok mendekati batas minimum. Siapkan order pembelian 563 Kg untuk periode berikutnya.
+198,slow moving,overstock,RENDAH,KURANGI STOK,60.91,0.0,16.39,0.0,0.58,0.0,11.11,Stok berlebih (61 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+199,slow moving,overstock,RENDAH,KURANGI STOK,947.97,148.12,38.87,0.0,0.21,0.0,97.67,Stok berlebih (948 Kg vs kebutuhan 148 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+200,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,112.28,114.39,27.48,29.59,1.76,37.93,3.45,Stok kurang (112 Kg vs kebutuhan 114 Kg). Segera restock minimal 2 Kg + safety stock 27 Kg.
+201,slow moving,overstock,RENDAH,KURANGI STOK,663.1,194.43,93.76,0.0,0.67,0.0,53.49,Stok berlebih (663 Kg vs kebutuhan 194 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+203,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,1.59,96.81,17.99,113.21,1.0,11.76,0.0,Stok kurang (2 Kg vs kebutuhan 97 Kg). Segera restock minimal 95 Kg + safety stock 18 Kg.
+204,slow moving,overstock,RENDAH,KURANGI STOK,80.05,139.13,37.82,59.08,0.59,2.38,61.9,Stok berlebih (80 Kg vs kebutuhan 139 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+205,slow moving,optimal,RENDAH,PERTAHANKAN,743.18,796.19,195.13,796.19,1.16,0.0,0.0,Stok dalam kondisi optimal (743 Kg). Pertahankan pola restocking saat ini.
+206,medium moving,perlu_perhatian,SEDANG,MONITOR & SIAPKAN,142.61,183.1,42.76,201.41,2.33,16.28,0.0,Stok mendekati batas minimum. Siapkan order pembelian 183 Kg untuk periode berikutnya.
+208,slow moving,overstock,RENDAH,KURANGI STOK,28.62,0.0,37.49,0.0,0.38,10.0,0.0,Stok berlebih (29 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+209,slow moving,overstock,RENDAH,KURANGI STOK,142.75,0.0,41.52,0.0,0.21,0.0,40.0,Stok berlebih (143 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+211,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,56.14,501.5,90.75,536.11,4.04,28.57,0.0,Stok kurang (56 Kg vs kebutuhan 502 Kg). Segera restock minimal 445 Kg + safety stock 91 Kg.
+212,slow moving,overstock,RENDAH,KURANGI STOK,212.01,0.0,65.57,0.0,1.34,0.0,0.0,Stok berlebih (212 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+214,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,320.51,651.97,199.34,530.8,1.77,26.92,0.0,Stok kurang (321 Kg vs kebutuhan 652 Kg). Segera restock minimal 331 Kg + safety stock 199 Kg.
+215,slow moving,overstock,RENDAH,KURANGI STOK,89.22,0.0,66.6,0.0,2.56,0.0,0.0,Stok berlebih (89 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+216,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,292.28,866.11,242.7,816.53,0.86,2.63,0.0,Stok kurang (292 Kg vs kebutuhan 866 Kg). Segera restock minimal 574 Kg + safety stock 243 Kg.
+217,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,1171.93,1297.76,309.3,435.13,0.92,25.93,0.0,Stok kurang (1172 Kg vs kebutuhan 1298 Kg). Segera restock minimal 126 Kg + safety stock 309 Kg.
+218,slow moving,overstock,RENDAH,KURANGI STOK,2421.61,742.03,150.81,0.0,0.43,0.0,67.44,Stok berlebih (2422 Kg vs kebutuhan 742 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+222,slow moving,overstock,RENDAH,KURANGI STOK,158.63,0.0,34.97,0.0,1.02,0.0,0.0,Stok berlebih (159 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+223,slow moving,optimal,RENDAH,PERTAHANKAN,2423.76,2356.27,343.59,2356.27,0.93,4.65,20.93,Stok dalam kondisi optimal (2424 Kg). Pertahankan pola restocking saat ini.
+224,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,128.58,585.39,69.92,526.73,0.9,9.09,0.0,Stok kurang (129 Kg vs kebutuhan 585 Kg). Segera restock minimal 457 Kg + safety stock 70 Kg.
+226,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,68.15,267.88,73.6,273.33,0.43,0.0,4.0,Stok kurang (68 Kg vs kebutuhan 268 Kg). Segera restock minimal 200 Kg + safety stock 74 Kg.
+228,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,236.51,821.49,67.2,652.18,1.15,6.9,0.0,Stok kurang (237 Kg vs kebutuhan 821 Kg). Segera restock minimal 585 Kg + safety stock 67 Kg.
+230,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,218.24,450.79,166.69,399.24,0.78,21.95,0.0,Stok kurang (218 Kg vs kebutuhan 451 Kg). Segera restock minimal 233 Kg + safety stock 167 Kg.
+232,slow moving,overstock,RENDAH,KURANGI STOK,2021.56,2968.17,527.79,946.61,0.66,2.33,44.19,Stok berlebih (2022 Kg vs kebutuhan 2968 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+234,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,215.62,2743.25,494.61,3022.24,3.4,25.58,0.0,Stok kurang (216 Kg vs kebutuhan 2743 Kg). Segera restock minimal 2528 Kg + safety stock 495 Kg.
+235,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,87.55,414.55,66.49,393.49,1.29,18.92,0.0,Stok kurang (88 Kg vs kebutuhan 415 Kg). Segera restock minimal 327 Kg + safety stock 66 Kg.
+236,slow moving,overstock,RENDAH,KURANGI STOK,31.52,0.0,20.68,0.0,0.8,16.67,0.0,Stok berlebih (32 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+237,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,582.92,1930.95,244.43,1592.46,1.38,2.38,0.0,Stok kurang (583 Kg vs kebutuhan 1931 Kg). Segera restock minimal 1348 Kg + safety stock 244 Kg.
+242,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,172.38,248.88,87.2,273.77,0.56,0.0,0.0,Stok mendekati batas minimum. Siapkan order pembelian 249 Kg untuk periode berikutnya.
+243,fast moving,overstock,TINGGI,KURANGI STOK,24112.94,6656.47,1221.09,0.0,0.48,0.0,51.16,Stok berlebih (24113 Kg vs kebutuhan 6656 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+246,slow moving,overstock,RENDAH,KURANGI STOK,22.11,0.0,63.9,0.0,0.26,4.0,0.0,Stok berlebih (22 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+247,slow moving,overstock,RENDAH,KURANGI STOK,1059.41,0.0,329.06,0.0,1.17,0.0,0.0,Stok berlebih (1059 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+248,slow moving,overstock,RENDAH,KURANGI STOK,92.08,0.0,33.9,0.0,1.44,0.0,0.0,Stok berlebih (92 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+249,slow moving,overstock,RENDAH,KURANGI STOK,4281.65,1273.06,1109.99,0.0,0.89,2.33,16.28,Stok berlebih (4282 Kg vs kebutuhan 1273 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+250,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,24.09,180.49,67.93,224.33,3.6,19.51,0.0,Stok kurang (24 Kg vs kebutuhan 180 Kg). Segera restock minimal 156 Kg + safety stock 68 Kg.
+251,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,35.68,294.47,57.14,315.93,1.48,7.14,0.0,Stok kurang (36 Kg vs kebutuhan 294 Kg). Segera restock minimal 259 Kg + safety stock 57 Kg.
+252,slow moving,overstock,RENDAH,KURANGI STOK,241.98,0.0,70.84,0.0,0.93,0.0,0.0,Stok berlebih (242 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+257,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,0.0,1663.37,303.09,1966.46,0.35,12.9,0.0,Stok kurang (0 Kg vs kebutuhan 1663 Kg). Segera restock minimal 1663 Kg + safety stock 303 Kg.
+258,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,3.96,100.97,46.9,143.91,2.33,0.0,0.0,Stok kurang (4 Kg vs kebutuhan 101 Kg). Segera restock minimal 97 Kg + safety stock 47 Kg.
+262,slow moving,overstock,RENDAH,KURANGI STOK,3075.47,1613.62,398.53,0.0,0.2,0.0,90.24,Stok berlebih (3075 Kg vs kebutuhan 1614 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+269,fast moving,overstock,TINGGI,KURANGI STOK,31177.49,10343.05,2178.72,0.0,0.4,0.0,74.42,Stok berlebih (31177 Kg vs kebutuhan 10343 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+270,slow moving,overstock,RENDAH,KURANGI STOK,160.37,0.0,138.12,0.0,0.21,0.0,0.0,Stok berlebih (160 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+271,slow moving,overstock,RENDAH,KURANGI STOK,700.74,400.72,71.28,0.0,0.29,0.0,92.86,Stok berlebih (701 Kg vs kebutuhan 401 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+274,slow moving,overstock,RENDAH,KURANGI STOK,110.74,0.0,73.83,0.0,0.21,0.0,0.0,Stok berlebih (111 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+280,slow moving,overstock,RENDAH,KURANGI STOK,29.38,0.0,20.97,0.0,0.63,0.0,9.09,Stok berlebih (29 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+281,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,99.83,329.43,85.67,315.27,0.71,2.33,2.33,Stok kurang (100 Kg vs kebutuhan 329 Kg). Segera restock minimal 230 Kg + safety stock 86 Kg.
+285,slow moving,overstock,RENDAH,KURANGI STOK,57.91,0.0,11.58,0.0,0.68,0.0,0.0,Stok berlebih (58 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+286,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,87.23,631.61,236.55,780.93,0.67,13.95,13.95,Stok kurang (87 Kg vs kebutuhan 632 Kg). Segera restock minimal 544 Kg + safety stock 237 Kg.
+288,slow moving,overstock,RENDAH,KURANGI STOK,14.5,0.0,4.94,0.0,1.51,0.0,0.0,Stok berlebih (14 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+401,slow moving,optimal,RENDAH,PERTAHANKAN,198.86,158.7,34.55,158.7,0.56,0.0,16.28,Stok dalam kondisi optimal (199 Kg). Pertahankan pola restocking saat ini.
+403,slow moving,overstock,RENDAH,KURANGI STOK,4.28,294.53,159.77,290.25,0.16,6.98,53.49,Stok berlebih (4 Kg vs kebutuhan 295 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+404,slow moving,overstock,RENDAH,KURANGI STOK,428.31,354.03,87.65,0.0,0.65,0.0,39.53,Stok berlebih (428 Kg vs kebutuhan 354 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+405,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,10.6,37.16,7.68,34.24,0.5,0.0,0.0,Stok kurang (11 Kg vs kebutuhan 37 Kg). Segera restock minimal 27 Kg + safety stock 8 Kg.
+406,slow moving,optimal,RENDAH,PERTAHANKAN,184.07,226.69,25.64,226.69,0.79,9.52,26.19,Stok dalam kondisi optimal (184 Kg). Pertahankan pola restocking saat ini.
+416,slow moving,overstock,RENDAH,KURANGI STOK,112.48,0.0,57.58,0.0,0.38,0.0,0.0,Stok berlebih (112 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+417,slow moving,overstock,RENDAH,KURANGI STOK,9.65,0.0,3.88,0.0,1.04,0.0,0.0,Stok berlebih (10 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+418,slow moving,overstock,RENDAH,KURANGI STOK,223.37,113.63,20.56,0.0,0.17,0.0,95.35,Stok berlebih (223 Kg vs kebutuhan 114 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+419,slow moving,overstock,RENDAH,KURANGI STOK,484.05,170.05,35.75,0.0,0.34,0.0,88.37,Stok berlebih (484 Kg vs kebutuhan 170 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+420,slow moving,overstock,RENDAH,KURANGI STOK,57.98,0.0,26.26,0.0,0.24,0.0,0.0,Stok berlebih (58 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+421,slow moving,overstock,RENDAH,KURANGI STOK,8.46,0.0,2.58,0.0,0.9,0.0,0.0,Stok berlebih (8 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+422,slow moving,overstock,RENDAH,KURANGI STOK,47.91,0.0,19.55,0.0,1.27,0.0,0.0,Stok berlebih (48 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+423,slow moving,overstock,RENDAH,KURANGI STOK,815.3,286.14,56.43,0.0,0.37,2.5,52.5,Stok berlebih (815 Kg vs kebutuhan 286 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+424,slow moving,overstock,RENDAH,KURANGI STOK,59.81,0.0,34.15,0.0,0.88,0.0,0.0,Stok berlebih (60 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+425,slow moving,overstock,RENDAH,KURANGI STOK,76.54,0.0,15.55,0.0,0.78,0.0,0.0,Stok berlebih (77 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+426,slow moving,overstock,RENDAH,KURANGI STOK,35.96,0.0,20.69,0.0,0.48,12.5,0.0,Stok berlebih (36 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+428,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,171.8,514.7,85.19,428.09,0.83,0.0,11.63,Stok kurang (172 Kg vs kebutuhan 515 Kg). Segera restock minimal 343 Kg + safety stock 85 Kg.
+429,slow moving,overstock,RENDAH,KURANGI STOK,48.92,0.0,29.26,0.0,0.15,0.0,0.0,Stok berlebih (49 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+432,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,0.0,0.0,41.58,41.58,0.41,23.53,0.0,Stok kurang (0 Kg vs kebutuhan 0 Kg). Segera restock minimal 0 Kg + safety stock 42 Kg.
+435,slow moving,overstock,RENDAH,KURANGI STOK,227.9,0.0,46.47,0.0,0.92,0.0,0.0,Stok berlebih (228 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+436,slow moving,overstock,RENDAH,KURANGI STOK,133.96,0.0,52.64,0.0,0.78,0.0,0.0,Stok berlebih (134 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+437,slow moving,overstock,RENDAH,KURANGI STOK,17.03,126.04,39.54,109.01,0.49,9.3,34.88,Stok berlebih (17 Kg vs kebutuhan 126 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+438,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,136.64,2642.03,178.94,2684.33,1.37,14.29,0.0,Stok kurang (137 Kg vs kebutuhan 2642 Kg). Segera restock minimal 2505 Kg + safety stock 179 Kg.
+439,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,443.49,948.04,230.09,734.64,1.23,11.63,0.0,Stok kurang (443 Kg vs kebutuhan 948 Kg). Segera restock minimal 505 Kg + safety stock 230 Kg.
+444,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,30.64,110.45,35.34,115.15,0.5,0.0,10.0,Stok kurang (31 Kg vs kebutuhan 110 Kg). Segera restock minimal 80 Kg + safety stock 35 Kg.
+445,slow moving,overstock,RENDAH,KURANGI STOK,2634.1,875.0,310.8,0.0,0.38,0.0,88.37,Stok berlebih (2634 Kg vs kebutuhan 875 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+446,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,71.32,128.34,46.7,103.72,1.52,20.93,2.33,Stok kurang (71 Kg vs kebutuhan 128 Kg). Segera restock minimal 57 Kg + safety stock 47 Kg.
+447,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,0.0,125.52,32.37,157.89,1.19,26.83,0.0,Stok kurang (0 Kg vs kebutuhan 126 Kg). Segera restock minimal 126 Kg + safety stock 32 Kg.
+448,slow moving,overstock,RENDAH,KURANGI STOK,285.63,832.87,224.97,547.24,0.32,0.0,31.03,Stok berlebih (286 Kg vs kebutuhan 833 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+449,slow moving,overstock,RENDAH,KURANGI STOK,57.3,0.0,28.47,0.0,2.01,0.0,0.0,Stok berlebih (57 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+450,slow moving,overstock,RENDAH,KURANGI STOK,114.19,0.0,30.75,0.0,0.95,0.0,0.0,Stok berlebih (114 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+451,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,335.97,1163.88,267.34,1095.25,2.43,25.0,0.0,Stok kurang (336 Kg vs kebutuhan 1164 Kg). Segera restock minimal 828 Kg + safety stock 267 Kg.
+454,slow moving,overstock,RENDAH,KURANGI STOK,2494.35,1004.82,230.79,0.0,0.39,0.0,74.42,Stok berlebih (2494 Kg vs kebutuhan 1005 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+455,slow moving,overstock,RENDAH,KURANGI STOK,26.53,0.0,17.41,0.0,0.42,0.0,0.0,Stok berlebih (27 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+456,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,567.22,1190.84,208.45,832.07,0.42,0.0,17.5,Stok kurang (567 Kg vs kebutuhan 1191 Kg). Segera restock minimal 624 Kg + safety stock 208 Kg.
+457,slow moving,optimal,RENDAH,PERTAHANKAN,5719.4,3609.9,874.17,3609.9,0.82,0.0,25.58,Stok dalam kondisi optimal (5719 Kg). Pertahankan pola restocking saat ini.
+458,slow moving,overstock,RENDAH,KURANGI STOK,2515.01,1344.2,766.48,0.0,0.56,0.0,16.28,Stok berlebih (2515 Kg vs kebutuhan 1344 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+459,medium moving,overstock,SEDANG,KURANGI STOK,0.0,2609.85,861.47,2609.85,0.43,25.58,37.21,Stok berlebih (0 Kg vs kebutuhan 2610 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+460,slow moving,overstock,RENDAH,KURANGI STOK,1280.72,348.84,122.94,0.0,0.47,0.0,72.09,Stok berlebih (1281 Kg vs kebutuhan 349 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+463,slow moving,overstock,RENDAH,KURANGI STOK,402.76,0.0,100.91,0.0,0.89,0.0,0.0,Stok berlebih (403 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+464,slow moving,overstock,RENDAH,KURANGI STOK,415.04,0.0,101.62,0.0,0.84,0.0,0.0,Stok berlebih (415 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+465,slow moving,overstock,RENDAH,KURANGI STOK,351.9,0.0,93.73,0.0,1.02,0.0,0.0,Stok berlebih (352 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+466,slow moving,overstock,RENDAH,KURANGI STOK,9.44,0.0,9.21,0.0,0.13,0.0,0.0,Stok berlebih (9 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+468,slow moving,overstock,RENDAH,KURANGI STOK,1165.27,1316.83,220.23,151.56,0.74,0.0,45.24,Stok berlebih (1165 Kg vs kebutuhan 1317 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+469,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,113.36,1135.63,214.0,1236.27,0.3,0.0,6.9,Stok kurang (113 Kg vs kebutuhan 1136 Kg). Segera restock minimal 1022 Kg + safety stock 214 Kg.
+470,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,873.03,4044.59,734.13,3905.69,0.31,3.45,0.0,Stok kurang (873 Kg vs kebutuhan 4045 Kg). Segera restock minimal 3172 Kg + safety stock 734 Kg.
+471,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,1087.02,4023.23,557.51,3493.72,0.4,0.0,0.0,Stok kurang (1087 Kg vs kebutuhan 4023 Kg). Segera restock minimal 2936 Kg + safety stock 558 Kg.
+472,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,639.35,2851.74,622.68,2835.07,0.36,0.0,0.0,Stok kurang (639 Kg vs kebutuhan 2852 Kg). Segera restock minimal 2212 Kg + safety stock 623 Kg.
+473,slow moving,overstock,RENDAH,KURANGI STOK,7.45,0.0,12.08,0.0,0.25,0.0,0.0,Stok berlebih (7 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+474,slow moving,overstock,RENDAH,KURANGI STOK,127.12,0.0,25.81,0.0,0.78,0.0,0.0,Stok berlebih (127 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+475,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,11.69,180.82,40.03,209.16,1.53,8.57,0.0,Stok kurang (12 Kg vs kebutuhan 181 Kg). Segera restock minimal 169 Kg + safety stock 40 Kg.
+477,slow moving,overstock,RENDAH,KURANGI STOK,652.28,0.0,233.86,0.0,1.25,0.0,0.0,Stok berlebih (652 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+478,slow moving,overstock,RENDAH,KURANGI STOK,49.27,0.0,152.68,0.0,0.4,4.0,0.0,Stok berlebih (49 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+479,slow moving,overstock,RENDAH,KURANGI STOK,1383.45,620.59,108.99,0.0,0.29,0.0,100.0,Stok berlebih (1383 Kg vs kebutuhan 621 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+480,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,470.91,644.95,286.91,460.95,1.49,25.0,0.0,Stok kurang (471 Kg vs kebutuhan 645 Kg). Segera restock minimal 174 Kg + safety stock 287 Kg.
+482,slow moving,overstock,RENDAH,KURANGI STOK,35.79,0.0,23.35,0.0,0.83,0.0,0.0,Stok berlebih (36 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+484,slow moving,overstock,RENDAH,KURANGI STOK,361.52,314.08,58.0,0.0,0.49,0.0,41.86,Stok berlebih (362 Kg vs kebutuhan 314 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+485,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,0.0,239.22,90.53,329.75,1.05,48.48,0.0,Stok kurang (0 Kg vs kebutuhan 239 Kg). Segera restock minimal 239 Kg + safety stock 91 Kg.
+486,slow moving,overstock,RENDAH,KURANGI STOK,111.32,0.0,130.27,0.0,0.66,0.0,0.0,Stok berlebih (111 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+487,slow moving,overstock,RENDAH,KURANGI STOK,87.3,0.0,43.59,0.0,0.71,0.0,0.0,Stok berlebih (87 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+488,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,5.6,468.93,110.19,573.52,0.37,6.06,27.27,Stok kurang (6 Kg vs kebutuhan 469 Kg). Segera restock minimal 463 Kg + safety stock 110 Kg.
+489,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,13.59,815.18,135.59,937.18,2.3,30.23,0.0,Stok kurang (14 Kg vs kebutuhan 815 Kg). Segera restock minimal 802 Kg + safety stock 136 Kg.
+493,medium moving,overstock,SEDANG,KURANGI STOK,4195.21,1878.68,303.38,0.0,0.94,19.44,38.89,Stok berlebih (4195 Kg vs kebutuhan 1879 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+495,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,43.61,3184.4,531.03,3671.82,1.27,11.63,9.3,Stok kurang (44 Kg vs kebutuhan 3184 Kg). Segera restock minimal 3141 Kg + safety stock 531 Kg.
+496,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,55.51,195.74,24.2,164.43,0.81,3.45,0.0,Stok kurang (56 Kg vs kebutuhan 196 Kg). Segera restock minimal 140 Kg + safety stock 24 Kg.
+497,slow moving,overstock,RENDAH,KURANGI STOK,648.83,1135.16,208.61,486.33,0.57,0.0,37.21,Stok berlebih (649 Kg vs kebutuhan 1135 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+498,slow moving,overstock,RENDAH,KURANGI STOK,658.64,474.35,123.6,0.0,0.31,0.0,64.29,Stok berlebih (659 Kg vs kebutuhan 474 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+499,slow moving,overstock,RENDAH,KURANGI STOK,356.42,0.0,102.23,0.0,1.19,0.0,0.0,Stok berlebih (356 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+502,slow moving,overstock,RENDAH,KURANGI STOK,1402.28,0.0,558.46,0.0,1.18,0.0,0.0,Stok berlebih (1402 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+503,slow moving,overstock,RENDAH,KURANGI STOK,16.1,0.0,4.94,0.0,0.89,0.0,0.0,Stok berlebih (16 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+504,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,3.11,23.68,10.11,30.68,1.04,6.06,0.0,Stok kurang (3 Kg vs kebutuhan 24 Kg). Segera restock minimal 21 Kg + safety stock 10 Kg.
+505,slow moving,overstock,RENDAH,KURANGI STOK,2.82,0.0,3.07,0.0,0.27,0.0,10.0,Stok berlebih (3 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+506,slow moving,overstock,RENDAH,KURANGI STOK,1.59,0.0,8.88,0.0,0.15,0.0,0.0,Stok berlebih (2 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+507,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,34.43,129.94,19.35,114.86,0.68,7.89,0.0,Stok kurang (34 Kg vs kebutuhan 130 Kg). Segera restock minimal 96 Kg + safety stock 19 Kg.
+508,slow moving,overstock,RENDAH,KURANGI STOK,430.83,354.73,54.01,0.0,0.46,0.0,58.14,Stok berlebih (431 Kg vs kebutuhan 355 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+509,slow moving,overstock,RENDAH,KURANGI STOK,83.77,0.0,11.41,0.0,0.66,0.0,100.0,Stok berlebih (84 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+510,slow moving,overstock,RENDAH,KURANGI STOK,111.43,178.41,35.19,66.98,0.38,0.0,46.15,Stok berlebih (111 Kg vs kebutuhan 178 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+514,slow moving,overstock,RENDAH,KURANGI STOK,79.28,0.0,17.94,0.0,1.02,0.0,0.0,Stok berlebih (79 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+515,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,32.17,124.92,22.05,114.8,0.42,0.0,2.7,Stok kurang (32 Kg vs kebutuhan 125 Kg). Segera restock minimal 93 Kg + safety stock 22 Kg.
+518,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,83.08,244.85,73.03,234.8,2.4,50.0,0.0,Stok kurang (83 Kg vs kebutuhan 245 Kg). Segera restock minimal 162 Kg + safety stock 73 Kg.
+519,slow moving,overstock,RENDAH,KURANGI STOK,114.47,0.0,32.83,0.0,1.01,0.0,0.0,Stok berlebih (114 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+521,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,158.09,835.67,145.33,822.91,0.76,0.0,0.0,Stok kurang (158 Kg vs kebutuhan 836 Kg). Segera restock minimal 678 Kg + safety stock 145 Kg.
+524,slow moving,overstock,RENDAH,KURANGI STOK,225.49,0.0,51.58,0.0,0.69,0.0,0.0,Stok berlebih (225 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+529,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,493.71,4802.42,1230.87,5539.58,1.56,7.14,7.14,Stok kurang (494 Kg vs kebutuhan 4802 Kg). Segera restock minimal 4309 Kg + safety stock 1231 Kg.
+530,slow moving,optimal,RENDAH,PERTAHANKAN,862.99,656.51,422.38,656.51,0.79,0.0,11.11,Stok dalam kondisi optimal (863 Kg). Pertahankan pola restocking saat ini.
+531,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,684.65,1309.13,210.65,1440.04,0.3,0.0,23.08,Stok mendekati batas minimum. Siapkan order pembelian 1309 Kg untuk periode berikutnya.
+532,medium moving,overstock,SEDANG,KURANGI STOK,45.02,0.0,58.22,0.0,1.16,33.33,0.0,Stok berlebih (45 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+533,slow moving,overstock,RENDAH,KURANGI STOK,105.68,0.0,27.18,0.0,1.04,0.0,0.0,Stok berlebih (106 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+535,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,593.65,3256.72,436.82,3099.89,0.49,4.55,0.0,Stok kurang (594 Kg vs kebutuhan 3257 Kg). Segera restock minimal 2663 Kg + safety stock 437 Kg.
+536,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,817.68,1649.1,310.02,1141.44,1.13,0.0,0.0,Stok kurang (818 Kg vs kebutuhan 1649 Kg). Segera restock minimal 831 Kg + safety stock 310 Kg.
+537,slow moving,overstock,RENDAH,KURANGI STOK,126.15,0.0,70.47,0.0,1.12,0.0,0.0,Stok berlebih (126 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+538,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,262.46,753.82,66.19,557.55,0.27,0.0,3.03,Stok kurang (262 Kg vs kebutuhan 754 Kg). Segera restock minimal 491 Kg + safety stock 66 Kg.
+539,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,843.31,1472.58,256.6,1619.84,0.98,2.33,18.6,Stok mendekati batas minimum. Siapkan order pembelian 1473 Kg untuk periode berikutnya.
+540,fast moving,overstock,TINGGI,KURANGI STOK,14063.75,8722.43,1686.62,0.0,0.47,0.0,97.67,Stok berlebih (14064 Kg vs kebutuhan 8722 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+542,slow moving,overstock,RENDAH,KURANGI STOK,32.95,0.0,16.38,0.0,1.12,0.0,0.0,Stok berlebih (33 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+544,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,560.74,3624.48,575.84,3639.58,0.53,2.86,20.0,Stok kurang (561 Kg vs kebutuhan 3624 Kg). Segera restock minimal 3064 Kg + safety stock 576 Kg.
+545,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,29.23,651.58,218.61,840.96,4.29,28.57,0.0,Stok kurang (29 Kg vs kebutuhan 652 Kg). Segera restock minimal 622 Kg + safety stock 219 Kg.
+547,slow moving,overstock,RENDAH,KURANGI STOK,20.28,0.0,57.04,0.0,0.25,3.23,0.0,Stok berlebih (20 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+549,slow moving,overstock,RENDAH,KURANGI STOK,393.9,0.0,175.71,0.0,0.19,0.0,0.0,Stok berlebih (394 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+551,slow moving,overstock,RENDAH,KURANGI STOK,254.24,0.0,156.74,0.0,2.23,0.0,0.0,Stok berlebih (254 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+553,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,0.0,757.68,70.42,828.1,1.03,16.28,9.3,Stok kurang (0 Kg vs kebutuhan 758 Kg). Segera restock minimal 758 Kg + safety stock 70 Kg.
+555,slow moving,overstock,RENDAH,KURANGI STOK,730.88,334.17,105.2,0.0,0.6,0.0,39.53,Stok berlebih (731 Kg vs kebutuhan 334 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+559,slow moving,overstock,RENDAH,KURANGI STOK,366.15,203.56,40.72,0.0,0.37,0.0,57.5,Stok berlebih (366 Kg vs kebutuhan 204 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+565,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,89.41,619.68,134.6,664.87,0.79,2.44,2.44,Stok kurang (89 Kg vs kebutuhan 620 Kg). Segera restock minimal 530 Kg + safety stock 135 Kg.
+566,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,82.8,301.72,96.85,315.77,0.91,0.0,5.41,Stok kurang (83 Kg vs kebutuhan 302 Kg). Segera restock minimal 219 Kg + safety stock 97 Kg.
+567,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,313.24,905.21,122.25,714.22,0.27,0.0,2.44,Stok kurang (313 Kg vs kebutuhan 905 Kg). Segera restock minimal 592 Kg + safety stock 122 Kg.
+568,slow moving,overstock,RENDAH,KURANGI STOK,1643.74,2478.71,538.25,834.97,0.59,0.0,39.53,Stok berlebih (1644 Kg vs kebutuhan 2479 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+569,slow moving,overstock,RENDAH,KURANGI STOK,802.75,1235.18,259.74,432.43,0.29,0.0,35.0,Stok berlebih (803 Kg vs kebutuhan 1235 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+572,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,265.79,403.87,72.65,444.26,0.37,0.0,8.0,Stok mendekati batas minimum. Siapkan order pembelian 404 Kg untuk periode berikutnya.
+573,slow moving,overstock,RENDAH,KURANGI STOK,1901.98,0.0,383.65,0.0,0.98,0.0,0.0,Stok berlebih (1902 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+574,slow moving,overstock,RENDAH,KURANGI STOK,947.55,503.07,92.31,0.0,0.39,0.0,78.05,Stok berlebih (948 Kg vs kebutuhan 503 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+575,slow moving,overstock,RENDAH,KURANGI STOK,10.66,0.0,17.95,0.0,0.49,0.0,0.0,Stok berlebih (11 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+578,slow moving,overstock,RENDAH,KURANGI STOK,4764.3,2753.43,495.36,0.0,0.63,4.65,60.47,Stok berlebih (4764 Kg vs kebutuhan 2753 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+579,slow moving,overstock,RENDAH,KURANGI STOK,335.32,0.0,90.02,0.0,0.88,0.0,0.0,Stok berlebih (335 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+580,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,485.8,354.41,60.19,389.85,0.54,11.43,17.14,Stok mendekati batas minimum. Siapkan order pembelian 354 Kg untuk periode berikutnya.
+582,slow moving,overstock,RENDAH,KURANGI STOK,321.12,0.0,80.9,0.0,0.72,0.0,0.0,Stok berlebih (321 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+584,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,36.89,171.43,53.84,188.38,0.57,3.7,25.93,Stok kurang (37 Kg vs kebutuhan 171 Kg). Segera restock minimal 135 Kg + safety stock 54 Kg.
+585,slow moving,optimal,RENDAH,PERTAHANKAN,95.14,116.09,22.51,116.09,0.53,0.0,3.85,Stok dalam kondisi optimal (95 Kg). Pertahankan pola restocking saat ini.
+587,slow moving,overstock,RENDAH,KURANGI STOK,38.9,0.0,7.41,0.0,0.93,0.0,0.0,Stok berlebih (39 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+588,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,132.8,868.93,219.19,955.32,1.23,0.0,0.0,Stok kurang (133 Kg vs kebutuhan 869 Kg). Segera restock minimal 736 Kg + safety stock 219 Kg.
+589,medium moving,overstock,SEDANG,KURANGI STOK,5.2,0.0,51.32,0.0,3.6,28.57,0.0,Stok berlebih (5 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+590,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,35.43,606.37,156.23,727.17,0.6,3.33,0.0,Stok kurang (35 Kg vs kebutuhan 606 Kg). Segera restock minimal 571 Kg + safety stock 156 Kg.
+591,medium moving,overstock,SEDANG,KURANGI STOK,62.76,0.0,91.08,0.0,1.45,23.33,0.0,Stok berlebih (63 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+592,slow moving,overstock,RENDAH,KURANGI STOK,93.72,0.0,36.93,0.0,0.42,0.0,0.0,Stok berlebih (94 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+593,slow moving,optimal,RENDAH,PERTAHANKAN,105.39,128.47,88.03,128.47,0.34,0.0,3.12,Stok dalam kondisi optimal (105 Kg). Pertahankan pola restocking saat ini.
+594,slow moving,overstock,RENDAH,KURANGI STOK,1210.3,725.15,241.31,0.0,0.25,0.0,75.0,Stok berlebih (1210 Kg vs kebutuhan 725 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+596,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,67.95,124.66,24.76,137.13,0.83,2.33,6.98,Stok mendekati batas minimum. Siapkan order pembelian 125 Kg untuk periode berikutnya.
+597,slow moving,overstock,RENDAH,KURANGI STOK,9.58,0.0,14.42,0.0,0.52,0.0,0.0,Stok berlebih (10 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+599,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,0.34,376.28,39.61,415.55,1.24,41.86,0.0,Stok kurang (0 Kg vs kebutuhan 376 Kg). Segera restock minimal 376 Kg + safety stock 40 Kg.
+600,slow moving,overstock,RENDAH,KURANGI STOK,3902.93,736.28,263.23,0.0,0.61,0.0,39.53,Stok berlebih (3903 Kg vs kebutuhan 736 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+602,medium moving,perlu_perhatian,SEDANG,MONITOR & SIAPKAN,399.66,334.68,79.03,368.14,2.49,20.0,5.0,Stok mendekati batas minimum. Siapkan order pembelian 335 Kg untuk periode berikutnya.
+606,slow moving,overstock,RENDAH,KURANGI STOK,86.48,0.0,9.68,0.0,0.55,0.0,100.0,Stok berlebih (86 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+608,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,204.42,1176.52,178.67,1150.77,1.36,6.98,13.95,Stok kurang (204 Kg vs kebutuhan 1177 Kg). Segera restock minimal 972 Kg + safety stock 179 Kg.
+611,slow moving,overstock,RENDAH,KURANGI STOK,658.43,0.0,217.01,0.0,0.27,0.0,0.0,Stok berlebih (658 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+612,slow moving,overstock,RENDAH,KURANGI STOK,1819.07,1233.37,123.0,0.0,0.35,0.0,90.7,Stok berlebih (1819 Kg vs kebutuhan 1233 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+613,slow moving,overstock,RENDAH,KURANGI STOK,113.37,0.0,36.01,0.0,1.02,0.0,0.0,Stok berlebih (113 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+614,slow moving,overstock,RENDAH,KURANGI STOK,57.32,0.0,12.11,0.0,0.57,0.0,25.0,Stok berlebih (57 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+616,slow moving,overstock,RENDAH,KURANGI STOK,18.19,0.0,81.71,0.0,0.37,3.7,0.0,Stok berlebih (18 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+618,slow moving,overstock,RENDAH,KURANGI STOK,146.28,0.0,228.66,0.0,0.2,0.0,0.0,Stok berlebih (146 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+619,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,169.53,156.34,78.17,78.17,1.64,33.33,0.0,Stok kurang (170 Kg vs kebutuhan 156 Kg). Segera restock minimal 0 Kg + safety stock 78 Kg.
+620,slow moving,overstock,RENDAH,KURANGI STOK,181.98,0.0,168.17,0.0,0.16,0.0,0.0,Stok berlebih (182 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+621,slow moving,overstock,RENDAH,KURANGI STOK,164.84,120.93,40.77,0.0,0.34,0.0,71.43,Stok berlebih (165 Kg vs kebutuhan 121 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+623,slow moving,overstock,RENDAH,KURANGI STOK,4.41,0.0,8.39,0.0,0.28,0.0,0.0,Stok berlebih (4 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+624,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,40.44,109.33,41.46,110.35,0.94,8.82,0.0,Stok kurang (40 Kg vs kebutuhan 109 Kg). Segera restock minimal 69 Kg + safety stock 41 Kg.
+626,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,33.62,65.33,9.96,71.86,0.55,10.81,8.11,Stok mendekati batas minimum. Siapkan order pembelian 65 Kg untuk periode berikutnya.
+630,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,1197.43,3480.1,335.96,2618.63,1.11,2.33,2.33,Stok kurang (1197 Kg vs kebutuhan 3480 Kg). Segera restock minimal 2283 Kg + safety stock 336 Kg.
+632,slow moving,overstock,RENDAH,KURANGI STOK,42.88,0.0,25.67,0.0,0.15,0.0,13.04,Stok berlebih (43 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+633,slow moving,overstock,RENDAH,KURANGI STOK,502.74,0.0,141.42,0.0,0.91,0.0,0.0,Stok berlebih (503 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+634,slow moving,overstock,RENDAH,KURANGI STOK,645.19,0.0,173.39,0.0,0.92,0.0,0.0,Stok berlebih (645 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+635,slow moving,overstock,RENDAH,KURANGI STOK,301.36,70.61,26.67,0.0,0.2,0.0,85.71,Stok berlebih (301 Kg vs kebutuhan 71 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+636,slow moving,overstock,RENDAH,KURANGI STOK,16.69,0.0,14.53,0.0,0.18,0.0,14.71,Stok berlebih (17 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+637,slow moving,overstock,RENDAH,KURANGI STOK,11.6,0.0,12.05,0.0,0.1,2.44,0.0,Stok berlebih (12 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+639,slow moving,overstock,RENDAH,KURANGI STOK,5339.95,1718.32,285.75,0.0,0.37,0.0,79.07,Stok berlebih (5340 Kg vs kebutuhan 1718 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+640,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,10.14,83.72,9.67,83.25,0.43,5.0,12.5,Stok kurang (10 Kg vs kebutuhan 84 Kg). Segera restock minimal 74 Kg + safety stock 10 Kg.
+641,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,9.2,138.91,24.5,154.21,0.58,2.44,0.0,Stok kurang (9 Kg vs kebutuhan 139 Kg). Segera restock minimal 130 Kg + safety stock 24 Kg.
+642,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,4.74,105.16,24.63,125.05,0.78,10.0,0.0,Stok kurang (5 Kg vs kebutuhan 105 Kg). Segera restock minimal 100 Kg + safety stock 25 Kg.
+643,slow moving,overstock,RENDAH,KURANGI STOK,40.23,0.0,13.55,0.0,0.26,0.0,2.56,Stok berlebih (40 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+647,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,106.38,1236.4,92.68,1222.7,0.95,8.33,0.0,Stok kurang (106 Kg vs kebutuhan 1236 Kg). Segera restock minimal 1130 Kg + safety stock 93 Kg.
+648,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,7.11,516.96,93.72,603.57,0.63,2.44,0.0,Stok kurang (7 Kg vs kebutuhan 517 Kg). Segera restock minimal 510 Kg + safety stock 94 Kg.
+649,slow moving,overstock,RENDAH,KURANGI STOK,20.87,0.0,10.42,0.0,1.45,0.0,0.0,Stok berlebih (21 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+651,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,990.3,992.48,175.59,177.77,2.13,23.26,0.0,Stok kurang (990 Kg vs kebutuhan 992 Kg). Segera restock minimal 2 Kg + safety stock 176 Kg.
+653,slow moving,overstock,RENDAH,KURANGI STOK,132.4,91.47,31.34,0.0,0.2,0.0,83.33,Stok berlebih (132 Kg vs kebutuhan 91 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+658,slow moving,overstock,RENDAH,KURANGI STOK,167.44,0.0,166.63,0.0,0.33,0.0,0.0,Stok berlebih (167 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+661,slow moving,overstock,RENDAH,KURANGI STOK,1932.92,784.0,185.72,0.0,0.35,0.0,93.02,Stok berlebih (1933 Kg vs kebutuhan 784 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+662,slow moving,overstock,RENDAH,KURANGI STOK,1629.6,543.9,102.49,0.0,0.32,0.0,74.42,Stok berlebih (1630 Kg vs kebutuhan 544 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+663,slow moving,overstock,RENDAH,KURANGI STOK,19.72,0.0,16.14,0.0,0.25,0.0,0.0,Stok berlebih (20 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+664,slow moving,overstock,RENDAH,KURANGI STOK,345.91,153.76,42.93,0.0,0.32,0.0,79.41,Stok berlebih (346 Kg vs kebutuhan 154 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+665,medium moving,overstock,SEDANG,KURANGI STOK,67.59,0.0,31.17,0.0,1.09,16.67,0.0,Stok berlebih (68 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+666,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,46.32,89.96,13.34,98.96,0.63,0.0,0.0,Stok mendekati batas minimum. Siapkan order pembelian 90 Kg untuk periode berikutnya.
+668,slow moving,overstock,RENDAH,KURANGI STOK,248.72,0.0,91.57,0.0,1.16,0.0,0.0,Stok berlebih (249 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+669,slow moving,overstock,RENDAH,KURANGI STOK,664.21,1585.76,53.78,921.55,0.54,0.0,60.47,Stok berlebih (664 Kg vs kebutuhan 1586 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+671,slow moving,optimal,RENDAH,PERTAHANKAN,2461.3,2531.74,162.73,2531.74,0.76,0.0,5.41,Stok dalam kondisi optimal (2461 Kg). Pertahankan pola restocking saat ini.
+673,slow moving,overstock,RENDAH,KURANGI STOK,70.53,0.0,59.18,0.0,1.59,0.0,0.0,Stok berlebih (71 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+674,slow moving,overstock,RENDAH,KURANGI STOK,75.3,0.0,82.45,0.0,0.18,0.0,0.0,Stok berlebih (75 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+675,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,55.83,1005.78,95.76,1045.71,0.68,0.0,0.0,Stok kurang (56 Kg vs kebutuhan 1006 Kg). Segera restock minimal 950 Kg + safety stock 96 Kg.
+676,slow moving,overstock,RENDAH,KURANGI STOK,5.95,0.0,30.7,0.0,0.26,4.76,0.0,Stok berlebih (6 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+677,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,24.33,124.19,27.72,127.58,0.29,5.41,8.11,Stok kurang (24 Kg vs kebutuhan 124 Kg). Segera restock minimal 100 Kg + safety stock 28 Kg.
+679,slow moving,overstock,RENDAH,KURANGI STOK,1719.69,655.09,240.53,0.0,0.55,11.63,53.49,Stok berlebih (1720 Kg vs kebutuhan 655 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+681,slow moving,overstock,RENDAH,KURANGI STOK,40.64,0.0,12.48,0.0,1.18,0.0,0.0,Stok berlebih (41 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+682,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,54.98,266.2,34.7,245.92,1.23,9.38,0.0,Stok kurang (55 Kg vs kebutuhan 266 Kg). Segera restock minimal 211 Kg + safety stock 35 Kg.
+683,slow moving,overstock,RENDAH,KURANGI STOK,2550.01,514.99,73.36,0.0,0.2,0.0,88.37,Stok berlebih (2550 Kg vs kebutuhan 515 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+684,slow moving,overstock,RENDAH,KURANGI STOK,283.23,480.23,89.46,197.0,0.56,9.52,45.24,Stok berlebih (283 Kg vs kebutuhan 480 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+685,slow moving,overstock,RENDAH,KURANGI STOK,37.77,0.0,14.68,0.0,0.97,0.0,0.0,Stok berlebih (38 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+686,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,3.68,117.78,52.39,166.49,1.47,16.67,4.76,Stok kurang (4 Kg vs kebutuhan 118 Kg). Segera restock minimal 114 Kg + safety stock 52 Kg.
+689,slow moving,overstock,RENDAH,KURANGI STOK,427.79,154.71,71.5,0.0,0.39,0.0,88.89,Stok berlebih (428 Kg vs kebutuhan 155 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+690,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,20.0,617.94,84.15,682.09,0.38,2.44,0.0,Stok kurang (20 Kg vs kebutuhan 618 Kg). Segera restock minimal 598 Kg + safety stock 84 Kg.
+691,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,21.23,440.31,131.17,550.25,2.21,13.95,0.0,Stok kurang (21 Kg vs kebutuhan 440 Kg). Segera restock minimal 419 Kg + safety stock 131 Kg.
+692,slow moving,optimal,RENDAH,PERTAHANKAN,1176.29,807.55,253.21,807.55,0.92,2.33,20.93,Stok dalam kondisi optimal (1176 Kg). Pertahankan pola restocking saat ini.
+694,slow moving,overstock,RENDAH,KURANGI STOK,68.25,0.0,21.25,0.0,1.03,0.0,0.0,Stok berlebih (68 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+695,slow moving,overstock,RENDAH,KURANGI STOK,177.42,0.0,35.51,0.0,0.98,0.0,0.0,Stok berlebih (177 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+696,slow moving,overstock,RENDAH,KURANGI STOK,200.62,0.0,38.73,0.0,0.47,0.0,20.0,Stok berlebih (201 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+706,slow moving,overstock,RENDAH,KURANGI STOK,1328.14,612.29,129.44,0.0,1.14,4.65,23.26,Stok berlebih (1328 Kg vs kebutuhan 612 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+707,slow moving,overstock,RENDAH,KURANGI STOK,261.64,64.54,12.06,0.0,0.43,9.3,48.84,Stok berlebih (262 Kg vs kebutuhan 65 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+708,slow moving,overstock,RENDAH,KURANGI STOK,613.22,496.53,125.69,0.0,0.64,0.0,55.81,Stok berlebih (613 Kg vs kebutuhan 497 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+709,slow moving,overstock,RENDAH,KURANGI STOK,171.93,358.14,44.19,186.21,0.62,0.0,31.58,Stok berlebih (172 Kg vs kebutuhan 358 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+710,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,11.25,36.77,13.35,38.87,0.5,0.0,24.0,Stok kurang (11 Kg vs kebutuhan 37 Kg). Segera restock minimal 26 Kg + safety stock 13 Kg.
+711,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,1.24,104.08,18.47,121.31,1.36,7.69,0.0,Stok kurang (1 Kg vs kebutuhan 104 Kg). Segera restock minimal 103 Kg + safety stock 18 Kg.
+712,slow moving,overstock,RENDAH,KURANGI STOK,46.94,0.0,6.42,0.0,0.64,0.0,50.0,Stok berlebih (47 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+720,slow moving,overstock,RENDAH,KURANGI STOK,3250.51,473.16,142.23,0.0,0.19,0.0,97.67,Stok berlebih (3251 Kg vs kebutuhan 473 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1101,slow moving,overstock,RENDAH,KURANGI STOK,1192.82,0.0,306.56,0.0,0.86,0.0,0.0,Stok berlebih (1193 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1102,slow moving,overstock,RENDAH,KURANGI STOK,673.91,0.0,96.25,0.0,0.71,0.0,0.0,Stok berlebih (674 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1103,slow moving,overstock,RENDAH,KURANGI STOK,630.31,0.0,149.74,0.0,0.76,0.0,0.0,Stok berlebih (630 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1104,slow moving,overstock,RENDAH,KURANGI STOK,669.61,0.0,164.97,0.0,0.73,0.0,0.0,Stok berlebih (670 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1105,slow moving,overstock,RENDAH,KURANGI STOK,593.78,0.0,107.65,0.0,0.8,0.0,0.0,Stok berlebih (594 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1106,slow moving,overstock,RENDAH,KURANGI STOK,37.6,0.0,37.51,0.0,0.75,0.0,0.0,Stok berlebih (38 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1108,slow moving,overstock,RENDAH,KURANGI STOK,211.17,0.0,39.44,0.0,0.66,0.0,100.0,Stok berlebih (211 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1109,slow moving,overstock,RENDAH,KURANGI STOK,1.6,0.0,0.24,0.0,0.62,0.0,100.0,Stok berlebih (2 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1110,slow moving,overstock,RENDAH,KURANGI STOK,1.08,0.0,0.41,0.0,1.85,0.0,0.0,Stok berlebih (1 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1111,slow moving,overstock,RENDAH,KURANGI STOK,1.06,0.0,0.3,0.0,0.94,0.0,0.0,Stok berlebih (1 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1112,slow moving,overstock,RENDAH,KURANGI STOK,17.48,0.0,10.99,0.0,0.09,0.0,21.21,Stok berlebih (17 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1113,slow moving,overstock,RENDAH,KURANGI STOK,17.74,0.0,52.9,0.0,0.19,2.44,9.76,Stok berlebih (18 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1117,slow moving,overstock,RENDAH,KURANGI STOK,5.12,0.0,0.8,0.0,0.7,0.0,0.0,Stok berlebih (5 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1201,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,0.0,0.0,86.1,86.1,0.81,50.0,0.0,Stok kurang (0 Kg vs kebutuhan 0 Kg). Segera restock minimal 0 Kg + safety stock 86 Kg.
+1206,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,54.24,121.75,39.29,106.8,0.2,0.0,17.24,Stok kurang (54 Kg vs kebutuhan 122 Kg). Segera restock minimal 68 Kg + safety stock 39 Kg.
+1212,slow moving,overstock,RENDAH,KURANGI STOK,29.66,0.0,31.18,0.0,0.19,0.0,0.0,Stok berlebih (30 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1215,slow moving,overstock,RENDAH,KURANGI STOK,309.84,0.0,238.98,0.0,0.33,0.0,0.0,Stok berlebih (310 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1216,slow moving,overstock,RENDAH,KURANGI STOK,73.95,0.0,13.07,0.0,0.58,0.0,100.0,Stok berlebih (74 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1220,slow moving,overstock,RENDAH,KURANGI STOK,258.68,0.0,58.13,0.0,0.81,0.0,0.0,Stok berlebih (259 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1227,slow moving,overstock,RENDAH,KURANGI STOK,28.63,0.0,15.68,0.0,1.99,0.0,0.0,Stok berlebih (29 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1229,slow moving,overstock,RENDAH,KURANGI STOK,105.85,0.0,18.52,0.0,0.84,0.0,0.0,Stok berlebih (106 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1231,slow moving,overstock,RENDAH,KURANGI STOK,169.14,0.0,22.33,0.0,0.54,0.0,100.0,Stok berlebih (169 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1233,slow moving,overstock,RENDAH,KURANGI STOK,276.75,0.0,79.81,0.0,0.89,0.0,0.0,Stok berlebih (277 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1234,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,109.47,287.62,98.33,276.48,0.62,12.82,0.0,Stok kurang (109 Kg vs kebutuhan 288 Kg). Segera restock minimal 178 Kg + safety stock 98 Kg.
+1237,slow moving,overstock,RENDAH,KURANGI STOK,28.2,0.0,9.13,0.0,0.45,0.0,0.0,Stok berlebih (28 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1238,slow moving,overstock,RENDAH,KURANGI STOK,558.03,373.55,95.08,0.0,0.35,0.0,65.12,Stok berlebih (558 Kg vs kebutuhan 374 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1240,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,98.05,496.29,84.03,482.27,0.87,21.43,0.0,Stok kurang (98 Kg vs kebutuhan 496 Kg). Segera restock minimal 398 Kg + safety stock 84 Kg.
+1242,slow moving,overstock,RENDAH,KURANGI STOK,467.04,0.0,132.71,0.0,0.84,0.0,0.0,Stok berlebih (467 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1243,slow moving,overstock,RENDAH,KURANGI STOK,1579.08,0.0,252.69,0.0,0.7,0.0,0.0,Stok berlebih (1579 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1244,slow moving,overstock,RENDAH,KURANGI STOK,413.86,0.0,49.93,0.0,0.58,0.0,100.0,Stok berlebih (414 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1304,slow moving,overstock,RENDAH,KURANGI STOK,28.01,0.0,27.3,0.0,0.2,0.0,5.0,Stok berlebih (28 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1305,slow moving,overstock,RENDAH,KURANGI STOK,19.84,0.0,22.02,0.0,0.34,0.0,0.0,Stok berlebih (20 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1306,slow moving,overstock,RENDAH,KURANGI STOK,32.12,0.0,28.97,0.0,0.22,0.0,0.0,Stok berlebih (32 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1307,slow moving,overstock,RENDAH,KURANGI STOK,121.6,0.0,30.67,0.0,0.8,0.0,0.0,Stok berlebih (122 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1308,slow moving,overstock,RENDAH,KURANGI STOK,36.99,0.0,29.89,0.0,0.25,0.0,0.0,Stok berlebih (37 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1309,slow moving,overstock,RENDAH,KURANGI STOK,16.88,0.0,15.75,0.0,0.58,0.0,0.0,Stok berlebih (17 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1310,slow moving,overstock,RENDAH,KURANGI STOK,75.27,0.0,33.27,0.0,0.42,0.0,0.0,Stok berlebih (75 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1311,slow moving,overstock,RENDAH,KURANGI STOK,21.6,0.0,25.18,0.0,0.34,0.0,0.0,Stok berlebih (22 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1312,slow moving,overstock,RENDAH,KURANGI STOK,59.89,0.0,29.59,0.0,0.56,0.0,0.0,Stok berlebih (60 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1313,slow moving,overstock,RENDAH,KURANGI STOK,61.11,0.0,16.12,0.0,0.92,0.0,0.0,Stok berlebih (61 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1315,slow moving,overstock,RENDAH,KURANGI STOK,386.41,0.0,210.94,0.0,0.48,0.0,0.0,Stok berlebih (386 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1317,slow moving,overstock,RENDAH,KURANGI STOK,1.74,0.0,0.82,0.0,1.44,0.0,0.0,Stok berlebih (2 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1320,slow moving,overstock,RENDAH,KURANGI STOK,57.82,0.0,16.62,0.0,0.93,0.0,0.0,Stok berlebih (58 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1321,slow moving,overstock,RENDAH,KURANGI STOK,41.92,68.4,23.78,26.48,0.3,4.65,39.53,Stok berlebih (42 Kg vs kebutuhan 68 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1322,slow moving,overstock,RENDAH,KURANGI STOK,823.26,0.0,118.96,0.0,0.56,0.0,40.0,Stok berlebih (823 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1323,slow moving,overstock,RENDAH,KURANGI STOK,1410.7,0.0,296.16,0.0,0.65,0.0,100.0,Stok berlebih (1411 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1324,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,10.56,63.53,35.12,88.09,1.16,4.65,0.0,Stok kurang (11 Kg vs kebutuhan 64 Kg). Segera restock minimal 53 Kg + safety stock 35 Kg.
+1325,slow moving,overstock,RENDAH,KURANGI STOK,18.5,0.0,7.49,0.0,0.12,0.0,0.0,Stok berlebih (18 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1326,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,1.9,194.79,46.5,239.39,0.44,2.38,0.0,Stok kurang (2 Kg vs kebutuhan 195 Kg). Segera restock minimal 193 Kg + safety stock 46 Kg.
+1328,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,338.44,618.07,320.54,679.87,1.22,10.0,6.67,Stok mendekati batas minimum. Siapkan order pembelian 618 Kg untuk periode berikutnya.
+1329,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,7.99,193.47,44.88,230.36,1.03,0.0,0.0,Stok kurang (8 Kg vs kebutuhan 193 Kg). Segera restock minimal 185 Kg + safety stock 45 Kg.
+1330,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,34.58,62.52,30.84,68.77,1.3,4.65,0.0,Stok mendekati batas minimum. Siapkan order pembelian 63 Kg untuk periode berikutnya.
+1331,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,225.6,551.97,196.1,522.47,0.33,3.33,30.0,Stok kurang (226 Kg vs kebutuhan 552 Kg). Segera restock minimal 326 Kg + safety stock 196 Kg.
+1332,slow moving,overstock,RENDAH,KURANGI STOK,244.68,0.0,40.56,0.0,0.55,0.0,100.0,Stok berlebih (245 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1333,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,10.06,85.25,28.05,103.24,1.38,13.16,0.0,Stok kurang (10 Kg vs kebutuhan 85 Kg). Segera restock minimal 75 Kg + safety stock 28 Kg.
+1334,slow moving,overstock,RENDAH,KURANGI STOK,35.02,0.0,8.21,0.0,0.97,0.0,0.0,Stok berlebih (35 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1335,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,72.25,325.51,35.4,288.66,0.86,2.63,0.0,Stok kurang (72 Kg vs kebutuhan 326 Kg). Segera restock minimal 253 Kg + safety stock 35 Kg.
+1336,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,18.08,84.76,21.95,88.63,0.52,0.0,28.95,Stok kurang (18 Kg vs kebutuhan 85 Kg). Segera restock minimal 67 Kg + safety stock 22 Kg.
+1337,slow moving,overstock,RENDAH,KURANGI STOK,11.61,0.0,18.31,0.0,0.13,0.0,0.0,Stok berlebih (12 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1338,slow moving,overstock,RENDAH,KURANGI STOK,22.05,0.0,7.73,0.0,1.01,0.0,0.0,Stok berlebih (22 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1340,slow moving,overstock,RENDAH,KURANGI STOK,57.46,0.0,10.63,0.0,0.89,0.0,0.0,Stok berlebih (57 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1341,slow moving,overstock,RENDAH,KURANGI STOK,26.46,0.0,14.17,0.0,1.89,0.0,0.0,Stok berlebih (26 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1342,slow moving,overstock,RENDAH,KURANGI STOK,1302.16,0.0,260.63,0.0,0.9,0.0,0.0,Stok berlebih (1302 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1343,slow moving,overstock,RENDAH,KURANGI STOK,139.12,0.0,36.83,0.0,0.9,0.0,0.0,Stok berlebih (139 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1345,slow moving,overstock,RENDAH,KURANGI STOK,106.47,0.0,26.28,0.0,0.15,0.0,62.5,Stok berlebih (106 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1347,slow moving,overstock,RENDAH,KURANGI STOK,198.39,0.0,43.56,0.0,0.9,0.0,0.0,Stok berlebih (198 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1348,medium moving,overstock,SEDANG,KURANGI STOK,41.16,0.0,36.24,0.0,4.35,0.0,0.0,Stok berlebih (41 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1349,slow moving,overstock,RENDAH,KURANGI STOK,54.13,0.0,53.58,0.0,0.85,6.45,0.0,Stok berlebih (54 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1353,slow moving,overstock,RENDAH,KURANGI STOK,87.8,0.0,26.65,0.0,0.58,0.0,0.0,Stok berlebih (88 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1354,slow moving,overstock,RENDAH,KURANGI STOK,52.02,127.0,33.67,74.98,0.18,0.0,61.54,Stok berlebih (52 Kg vs kebutuhan 127 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1355,slow moving,overstock,RENDAH,KURANGI STOK,350.35,0.0,79.55,0.0,0.76,0.0,0.0,Stok berlebih (350 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1356,slow moving,overstock,RENDAH,KURANGI STOK,100.57,0.0,39.08,0.0,0.19,0.0,10.34,Stok berlebih (101 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1357,slow moving,overstock,RENDAH,KURANGI STOK,294.11,0.0,76.58,0.0,1.1,0.0,0.0,Stok berlebih (294 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1359,slow moving,overstock,RENDAH,KURANGI STOK,13.72,0.0,9.14,0.0,0.55,0.0,0.0,Stok berlebih (14 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1361,slow moving,overstock,RENDAH,KURANGI STOK,195.73,0.0,66.11,0.0,0.49,0.0,0.0,Stok berlebih (196 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1362,slow moving,overstock,RENDAH,KURANGI STOK,64.09,0.0,12.76,0.0,0.73,0.0,0.0,Stok berlebih (64 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1363,slow moving,overstock,RENDAH,KURANGI STOK,49.1,0.0,37.15,0.0,0.23,0.0,0.0,Stok berlebih (49 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1364,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,26.16,53.13,26.71,53.68,0.64,0.0,2.56,Stok kurang (26 Kg vs kebutuhan 53 Kg). Segera restock minimal 27 Kg + safety stock 27 Kg.
+1366,slow moving,overstock,RENDAH,KURANGI STOK,56.85,0.0,37.31,0.0,0.5,3.03,0.0,Stok berlebih (57 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1370,slow moving,overstock,RENDAH,KURANGI STOK,25.93,0.0,10.86,0.0,0.24,0.0,3.85,Stok berlebih (26 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1371,slow moving,overstock,RENDAH,KURANGI STOK,21.74,0.0,22.69,0.0,0.2,0.0,0.0,Stok berlebih (22 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1372,slow moving,overstock,RENDAH,KURANGI STOK,119.0,0.0,51.04,0.0,0.72,0.0,0.0,Stok berlebih (119 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1373,slow moving,overstock,RENDAH,KURANGI STOK,117.78,0.0,341.36,0.0,0.63,14.29,0.0,Stok berlebih (118 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1400,fast moving,optimal,TINGGI,PERTAHANKAN,10565.46,9564.3,1753.43,9564.3,0.98,4.65,25.58,Stok dalam kondisi optimal (10565 Kg). Pertahankan pola restocking saat ini.
+1401,slow moving,overstock,RENDAH,KURANGI STOK,91.3,0.0,84.55,0.0,0.45,6.67,0.0,Stok berlebih (91 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1402,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,4.05,800.0,48.22,844.17,0.75,5.26,0.0,Stok kurang (4 Kg vs kebutuhan 800 Kg). Segera restock minimal 796 Kg + safety stock 48 Kg.
+1403,slow moving,overstock,RENDAH,KURANGI STOK,7.86,0.0,3.07,0.0,0.4,0.0,0.0,Stok berlebih (8 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1405,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,69.54,46.81,30.06,30.06,1.44,32.35,0.0,Stok kurang (70 Kg vs kebutuhan 47 Kg). Segera restock minimal 0 Kg + safety stock 30 Kg.
+1408,slow moving,optimal,RENDAH,PERTAHANKAN,58.48,60.15,16.82,60.15,0.35,0.0,13.33,Stok dalam kondisi optimal (58 Kg). Pertahankan pola restocking saat ini.
+1410,slow moving,overstock,RENDAH,KURANGI STOK,6.51,0.0,1.44,0.0,0.77,0.0,0.0,Stok berlebih (7 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1416,slow moving,overstock,RENDAH,KURANGI STOK,39.97,0.0,6.08,0.0,0.4,0.0,100.0,Stok berlebih (40 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+1417,slow moving,overstock,RENDAH,KURANGI STOK,80.42,0.0,29.47,0.0,1.12,0.0,0.0,Stok berlebih (80 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2004,fast moving,understock,KRITIS,TAMBAH STOK SEGERA,4221.22,22475.97,2154.02,20408.77,0.85,2.33,2.33,Stok kurang (4221 Kg vs kebutuhan 22476 Kg). Segera restock minimal 18255 Kg + safety stock 2154 Kg.
+2005,slow moving,overstock,RENDAH,KURANGI STOK,769.46,0.0,294.1,0.0,1.23,0.0,0.0,Stok berlebih (769 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2016,fast moving,overstock,TINGGI,KURANGI STOK,34853.55,22120.47,4255.24,0.0,0.71,9.52,45.24,Stok berlebih (34854 Kg vs kebutuhan 22120 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2018,slow moving,overstock,RENDAH,KURANGI STOK,1241.01,0.0,561.74,0.0,0.26,0.0,0.0,Stok berlebih (1241 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2019,slow moving,overstock,RENDAH,KURANGI STOK,1442.68,0.0,347.47,0.0,0.69,0.0,0.0,Stok berlebih (1443 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2028,slow moving,overstock,RENDAH,KURANGI STOK,762.79,0.0,323.91,0.0,1.31,0.0,0.0,Stok berlebih (763 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2035,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,325.49,2741.9,1581.44,3997.85,1.54,7.5,0.0,Stok kurang (325 Kg vs kebutuhan 2742 Kg). Segera restock minimal 2416 Kg + safety stock 1581 Kg.
+2036,slow moving,overstock,RENDAH,KURANGI STOK,406.27,0.0,449.16,0.0,0.23,2.78,0.0,Stok berlebih (406 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2037,slow moving,overstock,RENDAH,KURANGI STOK,8869.84,0.0,1291.46,0.0,0.56,0.0,100.0,Stok berlebih (8870 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2103,slow moving,overstock,RENDAH,KURANGI STOK,36.35,0.0,5.5,0.0,0.5,0.0,25.0,Stok berlebih (36 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2104,slow moving,overstock,RENDAH,KURANGI STOK,11.52,0.0,9.48,0.0,0.24,0.0,5.56,Stok berlebih (12 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2108,slow moving,overstock,RENDAH,KURANGI STOK,38.53,0.0,5.37,0.0,0.65,0.0,100.0,Stok berlebih (39 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2123,slow moving,overstock,RENDAH,KURANGI STOK,53.51,0.0,7.98,0.0,0.67,0.0,0.0,Stok berlebih (54 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2128,slow moving,overstock,RENDAH,KURANGI STOK,33.32,0.0,24.37,0.0,2.21,0.0,0.0,Stok berlebih (33 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2131,slow moving,overstock,RENDAH,KURANGI STOK,3.46,0.0,17.12,0.0,0.16,0.0,0.0,Stok berlebih (3 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2136,slow moving,overstock,RENDAH,KURANGI STOK,27.54,0.0,4.65,0.0,0.65,0.0,100.0,Stok berlebih (28 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2137,slow moving,overstock,RENDAH,KURANGI STOK,141.02,0.0,36.18,0.0,0.98,0.0,0.0,Stok berlebih (141 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2138,slow moving,overstock,RENDAH,KURANGI STOK,65.2,0.0,14.92,0.0,0.67,0.0,0.0,Stok berlebih (65 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2139,slow moving,overstock,RENDAH,KURANGI STOK,22.41,0.0,10.82,0.0,0.14,0.0,0.0,Stok berlebih (22 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2146,slow moving,overstock,RENDAH,KURANGI STOK,82.81,0.0,26.06,0.0,0.97,0.0,0.0,Stok berlebih (83 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2149,slow moving,overstock,RENDAH,KURANGI STOK,149.12,0.0,34.79,0.0,1.01,0.0,0.0,Stok berlebih (149 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+2150,slow moving,overstock,RENDAH,KURANGI STOK,13.29,0.0,29.58,0.0,0.4,0.0,0.0,Stok berlebih (13 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3005,slow moving,overstock,RENDAH,KURANGI STOK,820.69,0.0,269.33,0.0,0.11,0.0,38.46,Stok berlebih (821 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3007,slow moving,overstock,RENDAH,KURANGI STOK,25.49,0.0,6.52,0.0,0.98,0.0,0.0,Stok berlebih (25 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3011,slow moving,overstock,RENDAH,KURANGI STOK,346.63,0.0,89.49,0.0,0.59,0.0,0.0,Stok berlebih (347 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3012,slow moving,overstock,RENDAH,KURANGI STOK,330.31,0.0,44.44,0.0,0.61,0.0,100.0,Stok berlebih (330 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3019,slow moving,overstock,RENDAH,KURANGI STOK,1979.49,0.0,330.14,0.0,0.78,0.0,0.0,Stok berlebih (1979 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3031,slow moving,overstock,RENDAH,KURANGI STOK,26.1,0.0,11.14,0.0,0.26,0.0,0.0,Stok berlebih (26 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3033,slow moving,overstock,RENDAH,KURANGI STOK,727.21,0.0,255.53,0.0,0.73,0.0,0.0,Stok berlebih (727 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3036,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,51.36,3447.93,555.1,3951.67,2.79,26.67,0.0,Stok kurang (51 Kg vs kebutuhan 3448 Kg). Segera restock minimal 3397 Kg + safety stock 555 Kg.
+3045,slow moving,perlu_perhatian,RENDAH,MONITOR & SIAPKAN,986.12,1676.79,302.92,1844.47,0.46,0.0,0.0,Stok mendekati batas minimum. Siapkan order pembelian 1677 Kg untuk periode berikutnya.
+3063,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,394.95,1040.94,231.97,877.96,1.47,6.25,0.0,Stok kurang (395 Kg vs kebutuhan 1041 Kg). Segera restock minimal 646 Kg + safety stock 232 Kg.
+3065,slow moving,overstock,RENDAH,KURANGI STOK,37.75,0.0,8.39,0.0,0.9,0.0,0.0,Stok berlebih (38 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3074,slow moving,optimal,RENDAH,PERTAHANKAN,3269.67,3444.1,314.84,3444.1,0.68,0.0,23.08,Stok dalam kondisi optimal (3270 Kg). Pertahankan pola restocking saat ini.
+3079,slow moving,overstock,RENDAH,KURANGI STOK,311.85,0.0,53.36,0.0,0.8,0.0,0.0,Stok berlebih (312 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3084,slow moving,overstock,RENDAH,KURANGI STOK,357.2,0.0,58.16,0.0,0.7,0.0,0.0,Stok berlebih (357 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3090,slow moving,overstock,RENDAH,KURANGI STOK,2.85,0.0,8.22,0.0,0.18,3.57,3.57,Stok berlebih (3 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3107,slow moving,overstock,RENDAH,KURANGI STOK,67.99,0.0,91.13,0.0,0.12,0.0,7.69,Stok berlebih (68 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3108,slow moving,overstock,RENDAH,KURANGI STOK,680.49,0.0,272.55,0.0,1.21,0.0,0.0,Stok berlebih (680 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3122,slow moving,overstock,RENDAH,KURANGI STOK,1.29,0.0,0.25,0.0,0.78,0.0,0.0,Stok berlebih (1 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3123,slow moving,overstock,RENDAH,KURANGI STOK,1.1,0.0,0.32,0.0,0.91,0.0,0.0,Stok berlebih (1 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3125,slow moving,optimal,RENDAH,PERTAHANKAN,29.02,33.68,8.01,33.68,0.56,4.76,19.05,Stok dalam kondisi optimal (29 Kg). Pertahankan pola restocking saat ini.
+3127,slow moving,overstock,RENDAH,KURANGI STOK,1.51,0.0,0.27,0.0,0.66,0.0,100.0,Stok berlebih (2 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3136,slow moving,overstock,RENDAH,KURANGI STOK,1.07,0.0,0.33,0.0,0.93,0.0,0.0,Stok berlebih (1 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3140,slow moving,overstock,RENDAH,KURANGI STOK,23.9,0.0,5.34,0.0,1.05,0.0,0.0,Stok berlebih (24 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3149,slow moving,overstock,RENDAH,KURANGI STOK,0.49,0.0,0.22,0.0,2.04,0.0,0.0,Stok berlebih (0 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3150,slow moving,overstock,RENDAH,KURANGI STOK,5.43,0.0,6.19,0.0,0.29,3.85,0.0,Stok berlebih (5 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3151,slow moving,overstock,RENDAH,KURANGI STOK,9.89,0.0,5.27,0.0,0.4,0.0,0.0,Stok berlebih (10 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3153,slow moving,overstock,RENDAH,KURANGI STOK,39.62,0.0,5.89,0.0,0.63,0.0,100.0,Stok berlebih (40 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+3155,slow moving,understock,RENDAH,TAMBAH STOK SEGERA,3.25,35.41,5.27,37.43,0.89,14.29,0.0,Stok kurang (3 Kg vs kebutuhan 35 Kg). Segera restock minimal 32 Kg + safety stock 5 Kg.
+3156,medium moving,understock,TINGGI,TAMBAH STOK SEGERA,3.08,38.88,12.22,48.02,2.13,39.13,0.0,Stok kurang (3 Kg vs kebutuhan 39 Kg). Segera restock minimal 36 Kg + safety stock 12 Kg.
+3159,slow moving,overstock,RENDAH,KURANGI STOK,7.52,0.0,3.91,0.0,0.39,0.0,0.0,Stok berlebih (8 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+10359,slow moving,overstock,RENDAH,KURANGI STOK,7.34,0.0,9.52,0.0,0.79,11.11,0.0,Stok berlebih (7 Kg vs kebutuhan 0 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.
+12823,slow moving,overstock,RENDAH,KURANGI STOK,449.77,257.68,71.31,0.0,0.3,0.0,64.71,Stok berlebih (450 Kg vs kebutuhan 258 Kg). Kurangi pembelian dan pertimbangkan promosi/bundling untuk menghabiskan stok.

@@ -1,0 +1,28 @@
+metric,value,unit,description
+MAE,339.676,Kg,Mean Absolute Error - Rata-rata kesalahan absolut prediksi
+RMSE,1178.056,Kg,Root Mean Squared Error - Akar rata-rata kuadrat kesalahan
+MAPE,24.06,%,Mean Absolute Percentage Error - Rata-rata persentase kesalahan
+R2_Score,0.9049,,Koefisien determinasi - Seberapa baik model menjelaskan variasi data
+N_Estimators,150.0,trees,Jumlah pohon keputusan dalam Random Forest
+Max_Depth,12.0,,Kedalaman maksimum setiap pohon keputusan
+Min_Samples_Split,5.0,,Minimum sampel untuk split node
+Min_Samples_Leaf,3.0,,Minimum sampel pada leaf node
+Training_Samples,3188.0,rows,Jumlah data latih (80% dari total)
+Test_Samples,797.0,rows,Jumlah data uji (20% dari total)
+Total_Features,16.0,,Jumlah fitur yang digunakan
+FI_qty_rolling_3,0.8922,,Feature Importance: qty_rolling_3
+FI_value_lag_1,0.0221,,Feature Importance: value_lag_1
+FI_value_lag_2,0.0179,,Feature Importance: value_lag_2
+FI_qty_lag_2,0.0145,,Feature Importance: qty_lag_2
+FI_qty_lag_1,0.0114,,Feature Importance: qty_lag_1
+FI_value_rolling_3,0.009,,Feature Importance: value_rolling_3
+FI_month_num,0.0066,,Feature Importance: month_num
+FI_safety_stock,0.0058,,Feature Importance: safety_stock
+FI_value_lag_3,0.0041,,Feature Importance: value_lag_3
+FI_stok_lag_1,0.0037,,Feature Importance: stok_lag_1
+FI_stok_lag_2,0.0031,,Feature Importance: stok_lag_2
+FI_qty_lag_3,0.0031,,Feature Importance: qty_lag_3
+FI_stok_lag_3,0.0025,,Feature Importance: stok_lag_3
+FI_stok_rolling_3,0.0022,,Feature Importance: stok_rolling_3
+FI_turnover_ratio,0.0012,,Feature Importance: turnover_ratio
+FI_segment_code,0.0007,,Feature Importance: segment_code
