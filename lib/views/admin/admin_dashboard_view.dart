@@ -19,6 +19,7 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
   final DatabaseService _dbService = DatabaseService();
   List<Product> _products = [];
   bool _isLoading = true;
+  int _currentPage = 1;
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
 
   setState(() {
     _products = products;
+    _currentPage = 1;
     _isLoading = false;
   });
 }
@@ -245,71 +247,89 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
                           ),
                         ),
                       ),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _products.length,
-                          itemBuilder: (context, index) {
-                            final product = _products[index];
-                            return Card(
-                              margin: const EdgeInsets.symmetric(vertical: 6.0),
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.all(8.0),
-                                leading: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: ProductImageHelper.buildProductImage(
-                                    product.imageUrl,
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.cover,
-                                    errorWidget: Container(
-                                      width: 60,
-                                      height: 60,
-                                      color: theme.colorScheme.primaryContainer,
-                                      child: Icon(
-                                        Icons.image_not_supported_outlined,
-                                        color: theme.colorScheme.onPrimaryContainer,
-                                      ),
-                                    ),
+                      () {
+                        final totalItems = _products.length;
+                        final startIndex = (_currentPage - 1) * 10;
+                        final endIndex = startIndex + 10 > totalItems ? totalItems : startIndex + 10;
+                        final paginatedProducts = totalItems == 0
+                            ? <Product>[]
+                            : _products.sublist(startIndex, endIndex);
+
+                        return Expanded(
+                          child: paginatedProducts.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    'Tidak ada katalog',
+                                    style: TextStyle(color: Colors.grey.shade600),
                                   ),
-                                ),
-                                title: Text(
-                                  product.name,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      product.description,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      _formatCurrency(product.price),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: theme.colorScheme.secondary,
+                                )
+                              : ListView.builder(
+                                  itemCount: paginatedProducts.length,
+                                  itemBuilder: (context, index) {
+                                    final product = paginatedProducts[index];
+                                    return Card(
+                                      margin: const EdgeInsets.symmetric(vertical: 6.0),
+                                      elevation: 2,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                    ),
-                                  ],
+                                      child: ListTile(
+                                        onTap: () => _showProductDetails(product),
+                                        contentPadding: const EdgeInsets.all(8.0),
+                                        leading: ClipRRect(
+                                          borderRadius: BorderRadius.circular(8.0),
+                                          child: ProductImageHelper.buildProductImage(
+                                            product.imageUrl,
+                                            width: 60,
+                                            height: 60,
+                                            fit: BoxFit.cover,
+                                            errorWidget: Container(
+                                              width: 60,
+                                              height: 60,
+                                              color: theme.colorScheme.primaryContainer,
+                                              child: Icon(
+                                                Icons.image_not_supported_outlined,
+                                                color: theme.colorScheme.onPrimaryContainer,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        title: Text(
+                                          product.name,
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        subtitle: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              product.description,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              _formatCurrency(product.price),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: theme.colorScheme.secondary,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: IconButton(
+                                          icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                          onPressed: () => _handleDeleteProduct(product),
+                                          tooltip: 'Hapus Barang',
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.delete_outline, color: Colors.red),
-                                  onPressed: () => _handleDeleteProduct(product),
-                                  tooltip: 'Hapus Barang',
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                        );
+                      }(),
+                      _buildPaginationControls(theme),
                     ],
                   ),
                 ),
@@ -329,6 +349,185 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
       ),
+    );
+  }
+
+  void _showProductDetails(Product product) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: ProductImageHelper.buildProductImage(
+                      product.imageUrl,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorWidget: Container(
+                        height: 200,
+                        color: theme.colorScheme.primaryContainer,
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 48,
+                          color: theme.colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    product.name,
+                    style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _formatCurrency(product.price),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.secondary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Deskripsi Produk',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    product.description,
+                    style: TextStyle(color: Colors.grey.shade700, height: 1.5, fontSize: 14),
+                  ),
+                  const SizedBox(height: 32),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            Navigator.pop(context);
+                            final updated = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AddProductView(product: product),
+                              ),
+                            );
+                            if (updated == true) {
+                              _loadProducts();
+                            }
+                          },
+                          icon: const Icon(Icons.edit_outlined, size: 18),
+                          label: const Text('Edit / Ubah Produk', style: TextStyle(fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _handleDeleteProduct(product);
+                        },
+                        icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                        label: const Text('Hapus', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          side: const BorderSide(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildPaginationControls(ThemeData theme) {
+    final totalPages = (_products.length / 10).ceil();
+    if (totalPages <= 1) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          onPressed: _currentPage > 1 ? () => setState(() => _currentPage--) : null,
+          icon: const Icon(Icons.chevron_left),
+          color: theme.colorScheme.primary,
+        ),
+        ...List.generate(totalPages, (index) {
+          final pageNum = index + 1;
+          final isSelected = pageNum == _currentPage;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: InkWell(
+              onTap: () => setState(() => _currentPage = pageNum),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                  border: Border.all(
+                    color: isSelected ? theme.colorScheme.primary : Colors.grey.shade300,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '$pageNum',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isSelected ? Colors.white : Colors.black87,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+        IconButton(
+          onPressed: _currentPage < totalPages ? () => setState(() => _currentPage++) : null,
+          icon: const Icon(Icons.chevron_right),
+          color: theme.colorScheme.primary,
+        ),
+      ],
     );
   }
 }
