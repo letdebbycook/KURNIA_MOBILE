@@ -4,8 +4,10 @@ import 'dart:js' as js;
 import 'package:flutter/foundation.dart';
 import '../../models/cart_item.dart';
 import '../../models/transaksi.dart';
+import '../../models/user_profile.dart';
 import '../../services/database_service.dart';
 import '../../services/cart_service.dart';
+import '../../services/ongkir_service.dart';
 import '../../widgets/product_image_helper.dart';
 
 class CheckoutView extends StatefulWidget {
@@ -25,6 +27,7 @@ class CheckoutView extends StatefulWidget {
 class _CheckoutViewState extends State<CheckoutView> {
   final DatabaseService _dbService = DatabaseService();
   final CartService _cartService = CartService();
+  final OngkirService _ongkirService = OngkirService();
 
   String _selectedPayment = 'Midtrans (Pembayaran Online)';
   bool _isProcessing = false;
@@ -35,8 +38,164 @@ class _CheckoutViewState extends State<CheckoutView> {
     {'name': 'Midtrans (Pembayaran Online)', 'code': 'MIDTRANS', 'account': '-'},
   ];
 
+  // Profile / Alamat state
+  UserProfile? _profile;
+  final _alamatController = TextEditingController();
+  final _teleponController = TextEditingController();
+  final _namaPenerimaController = TextEditingController();
+
+  // Dropdowns state
+  List<Map<String, String>> _provinces = [];
+  List<Map<String, String>> _cities = [];
+  List<Map<String, dynamic>> _shippingServices = [];
+
+  String? _selectedProvinceId;
+  String? _selectedProvinceName;
+  String? _selectedCityId;
+  String? _selectedCityName;
+  String _selectedCourier = 'JNE';
+  Map<String, dynamic>? _selectedShippingService;
+
+  bool _isLoadingShipping = false;
+  double _shippingCost = 0.0;
+
   double get _totalPrice => widget.cartItems.fold(0.0, (sum, item) => sum + item.subtotal);
+  double get _grandTotal => _totalPrice + _shippingCost;
   int get _totalItems => widget.cartItems.fold(0, (sum, item) => sum + item.quantity);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+    _loadProvinces();
+  }
+
+  @override
+  void dispose() {
+    _alamatController.dispose();
+    _teleponController.dispose();
+    _namaPenerimaController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      await _dbService.init();
+      final users = await _dbService.getUsers();
+      final user = users.firstWhere((u) => u.idUser == widget.idUser);
+      final profile = await _dbService.getUserProfile(user.username);
+      
+      setState(() {
+        _profile = profile;
+        _namaPenerimaController.text = profile.fullName.isNotEmpty ? profile.fullName : user.nama;
+        _teleponController.text = profile.phoneNumber.isNotEmpty ? profile.phoneNumber : user.telepon;
+        _alamatController.text = profile.alamat;
+      });
+    } catch (e) {
+      debugPrint('Error loading user profile: $e');
+    }
+  }
+
+  Future<void> _loadProvinces() async {
+    setState(() => _isLoadingShipping = true);
+    try {
+      final list = await _ongkirService.getProvinces();
+      setState(() {
+        _provinces = list;
+        _isLoadingShipping = false;
+      });
+    } catch (_) {
+      setState(() => _isLoadingShipping = false);
+    }
+  }
+
+  Future<void> _loadCities(String provinceId) async {
+    setState(() {
+      _isLoadingShipping = true;
+      _cities = [];
+      _selectedCityId = null;
+      _selectedCityName = null;
+      _shippingServices = [];
+      _selectedShippingService = null;
+      _shippingCost = 0.0;
+    });
+    try {
+      final list = await _ongkirService.getCities(provinceId);
+      setState(() {
+        _cities = list;
+        _isLoadingShipping = false;
+      });
+    } catch (_) {
+      setState(() => _isLoadingShipping = false);
+    }
+  }
+
+  Future<void> _calculateShipping() async {
+    if (_selectedCityId == null) return;
+    setState(() {
+      _isLoadingShipping = true;
+      _shippingServices = [];
+      _selectedShippingService = null;
+      _shippingCost = 0.0;
+    });
+    try {
+      // 1 unit = 250 grams
+      final totalWeight = _totalItems * 250;
+      final list = await _ongkirService.getShippingCost(
+        destinationCityId: _selectedCityId!,
+        weightInGrams: totalWeight,
+        courier: _selectedCourier,
+      );
+      setState(() {
+        _shippingServices = list;
+        if (list.isNotEmpty) {
+          _selectedShippingService = list.first;
+          _shippingCost = (_selectedShippingService!['cost'] as num).toDouble();
+        }
+        _isLoadingShipping = false;
+      });
+    } catch (_) {
+      setState(() => _isLoadingShipping = false);
+    }
+  }
+
+  bool _validateShipping() {
+    if (_namaPenerimaController.text.trim().isEmpty) {
+      _showSnackBar('Nama Penerima wajib diisi.');
+      return false;
+    }
+    if (_teleponController.text.trim().isEmpty) {
+      _showSnackBar('Nomor Telepon wajib diisi.');
+      return false;
+    }
+    if (_selectedProvinceId == null) {
+      _showSnackBar('Silakan pilih Provinsi tujuan.');
+      return false;
+    }
+    if (_selectedCityId == null) {
+      _showSnackBar('Silakan pilih Kota/Kabupaten tujuan.');
+      return false;
+    }
+    if (_alamatController.text.trim().isEmpty) {
+      _showSnackBar('Alamat Lengkap wajib diisi.');
+      return false;
+    }
+    if (_selectedShippingService == null) {
+      _showSnackBar('Silakan pilih Layanan Pengiriman.');
+      return false;
+    }
+    return true;
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   String _formatCurrency(double amount) {
     final str = amount.toStringAsFixed(0);
@@ -94,13 +253,20 @@ class _CheckoutViewState extends State<CheckoutView> {
   }
 
   Future<void> _handleCheckout() async {
+    if (!_validateShipping()) return;
+
     setState(() => _isProcessing = true);
 
     await _dbService.init();
     // Short delay for UI feedback feel
     await Future.delayed(const Duration(milliseconds: 300));
 
-    final metodeBayar = 'Midtrans';
+    final courierText = _selectedShippingService != null
+        ? '${_selectedCourier} ${_selectedShippingService!['service']}'
+        : _selectedCourier;
+    final metodeBayar = 'Midtrans ($courierText - Rp ${_shippingCost.toInt()})';
+    final completeAddress = '${_alamatController.text.trim()}, $_selectedCityName, $_selectedProvinceName';
+
     final now = DateTime.now();
     final List<Transaksi> savedOrders = [];
 
@@ -109,9 +275,12 @@ class _CheckoutViewState extends State<CheckoutView> {
       final dummyTransaksi = Transaksi(
         idUser: widget.idUser,
         metodeBayar: metodeBayar,
-        total: _totalPrice,
+        total: _grandTotal,
         productName: widget.cartItems.map((e) => e.product.name).join(', '),
         timestamp: now,
+        userNama: _namaPenerimaController.text.trim(),
+        userTelepon: _teleponController.text.trim(),
+        userAlamat: completeAddress,
       );
 
       final res = await _dbService.createMidtransTransaction(dummyTransaksi, widget.cartItems);
@@ -125,14 +294,29 @@ class _CheckoutViewState extends State<CheckoutView> {
             savedOrders.add(Transaksi(
               idUser: widget.idUser,
               metodeBayar: metodeBayar,
-              total: cartItem.product.price,
+              total: cartItem.product.price + (_shippingCost / _totalItems),
               productName: cartItem.product.name,
               timestamp: now,
               statusPembayaran: 'pending',
               midtransOrderId: orderId,
               midtransRedirectUrl: redirectUrl,
+              userNama: _namaPenerimaController.text.trim(),
+              userTelepon: _teleponController.text.trim(),
+              userAlamat: completeAddress,
             ));
           }
+        }
+
+        // Save updated address to user profile in db
+        if (_profile != null) {
+          final updatedProfile = UserProfile(
+            username: _profile!.username,
+            fullName: _namaPenerimaController.text.trim(),
+            phoneNumber: _teleponController.text.trim(),
+            alamat: completeAddress,
+            imageUrl: _profile!.imageUrl,
+          );
+          await _dbService.saveUserProfile(updatedProfile);
         }
 
         // Launch the payment redirection page
@@ -289,6 +473,171 @@ class _CheckoutViewState extends State<CheckoutView> {
           ),
           const SizedBox(height: 24),
 
+          // Informasi Pengiriman
+          Text('Informasi Pengiriman',
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    controller: _namaPenerimaController,
+                    decoration: InputDecoration(
+                      labelText: 'Nama Penerima',
+                      prefixIcon: const Icon(Icons.person),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _teleponController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      labelText: 'Nomor Telepon',
+                      prefixIcon: const Icon(Icons.phone),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: _selectedProvinceId,
+                    hint: const Text('Pilih Provinsi'),
+                    decoration: InputDecoration(
+                      labelText: 'Provinsi',
+                      prefixIcon: const Icon(Icons.map),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    style: const TextStyle(fontSize: 13, color: Colors.black87),
+                    items: _provinces.map((prov) {
+                      return DropdownMenuItem<String>(
+                        value: prov['id'],
+                        child: Text(prov['name']!, style: const TextStyle(fontSize: 13)),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        final prov = _provinces.firstWhere((p) => p['id'] == val);
+                        setState(() {
+                          _selectedProvinceId = val;
+                          _selectedProvinceName = prov['name'];
+                        });
+                        _loadCities(val);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: _selectedCityId,
+                    hint: const Text('Pilih Kota/Kabupaten'),
+                    decoration: InputDecoration(
+                      labelText: 'Kota/Kabupaten',
+                      prefixIcon: const Icon(Icons.location_city),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    style: const TextStyle(fontSize: 13, color: Colors.black87),
+                    items: _cities.map((city) {
+                      return DropdownMenuItem<String>(
+                        value: city['id'],
+                        child: Text(city['name']!, style: const TextStyle(fontSize: 13)),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        final city = _cities.firstWhere((c) => c['id'] == val);
+                        setState(() {
+                          _selectedCityId = val;
+                          _selectedCityName = city['name'];
+                        });
+                        _calculateShipping();
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _alamatController,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      labelText: 'Alamat Lengkap (Jalan, RT/RW, No. Rumah, dll.)',
+                      prefixIcon: const Icon(Icons.home),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.all(12),
+                    ),
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: _selectedCourier,
+                    decoration: InputDecoration(
+                      labelText: 'Kurir Pengiriman',
+                      prefixIcon: const Icon(Icons.local_shipping),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    style: const TextStyle(fontSize: 13, color: Colors.black87),
+                    items: const [
+                      DropdownMenuItem(value: 'JNE', child: Text('JNE (Jalur Nugraha Ekakurir)')),
+                      DropdownMenuItem(value: 'POS', child: Text('POS Indonesia')),
+                      DropdownMenuItem(value: 'TIKI', child: Text('TIKI (Titipan Kilat)')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() {
+                          _selectedCourier = val;
+                        });
+                        _calculateShipping();
+                      }
+                    },
+                  ),
+                  if (_isLoadingShipping) ...[
+                    const SizedBox(height: 16),
+                    const Center(child: CircularProgressIndicator()),
+                  ] else if (_shippingServices.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<Map<String, dynamic>>(
+                      value: _selectedShippingService,
+                      decoration: InputDecoration(
+                        labelText: 'Layanan Pengiriman',
+                        prefixIcon: const Icon(Icons.dry_cleaning),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      style: const TextStyle(fontSize: 13, color: Colors.black87),
+                      items: _shippingServices.map((service) {
+                        final costStr = _formatCurrency((service['cost'] as num).toDouble());
+                        return DropdownMenuItem<Map<String, dynamic>>(
+                          value: service,
+                          child: Text('${service['service']} - ${service['description']} ($costStr | ${service['etd']})', style: const TextStyle(fontSize: 12)),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedShippingService = val;
+                            _shippingCost = (val['cost'] as num).toDouble();
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
           // Metode Pembayaran
           Text('Metode Pembayaran',
               style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -354,9 +703,14 @@ class _CheckoutViewState extends State<CheckoutView> {
                 children: [
                   _buildSummaryRow('Subtotal ($_totalItems item)', _formatCurrency(_totalPrice), theme),
                   const SizedBox(height: 8),
-                  _buildSummaryRow('Ongkos Kirim', 'GRATIS', theme, valueColor: Colors.green.shade600),
+                  _buildSummaryRow(
+                    'Ongkos Kirim', 
+                    _shippingCost > 0 ? _formatCurrency(_shippingCost) : 'Pilih Alamat & Layanan', 
+                    theme, 
+                    valueColor: _shippingCost > 0 ? theme.colorScheme.secondary : Colors.red.shade600
+                  ),
                   const Divider(height: 20),
-                  _buildSummaryRow('TOTAL', _formatCurrency(_totalPrice), theme,
+                  _buildSummaryRow('TOTAL', _formatCurrency(_grandTotal), theme,
                       isBold: true, valueColor: theme.colorScheme.primary, fontSize: 16),
                 ],
               ),
@@ -379,7 +733,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                 const Icon(Icons.check_circle_outline, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'KONFIRMASI PEMBAYARAN - ${_formatCurrency(_totalPrice)}',
+                  'KONFIRMASI PEMBAYARAN - ${_formatCurrency(_grandTotal)}',
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ],
@@ -514,7 +868,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                     children: [
                       const Text('TOTAL DIBAYAR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                       Text(
-                        _formatCurrency(_totalPrice),
+                        _formatCurrency(_grandTotal),
                         style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 16),
                       ),
                     ],

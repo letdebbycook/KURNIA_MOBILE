@@ -27,6 +27,7 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
   List<Product> _filteredProducts = [];
   bool _isLoading = true;
   final _searchController = TextEditingController();
+  int _currentPage = 1;
 
   // Bottom Navigation tab index
   int _currentIndex = 0;
@@ -56,6 +57,7 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
     setState(() {
       _products = products;
       _filteredProducts = _products;
+      _currentPage = 1;
       _isLoading = false;
     });
   }
@@ -67,6 +69,7 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
         return product.name.toLowerCase().contains(query) ||
             product.description.toLowerCase().contains(query);
       }).toList();
+      _currentPage = 1;
     });
   }
 
@@ -397,13 +400,13 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Halo, Pelanggan Setia!',
+                      Text(
+                        'Halo, ${widget.username}!',
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
                       ),
                       const SizedBox(height: 4),
                       const Text(
-                        'Cari dan beli kebutuhan pokok harian Anda dengan mudah di Kurnia Mobile.',
+                        'Cari dan beli Kain Anda dengan mudah di Kurnia Mobile.',
                         style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                       const SizedBox(height: 16),
@@ -411,7 +414,7 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                       TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: 'Cari beras, minyak, tepung...',
+                          hintText: 'Cari Kain ...',
                           prefixIcon: const Icon(Icons.search, color: Colors.grey),
                           filled: true,
                           fillColor: Colors.white,
@@ -437,31 +440,39 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                 const SizedBox(height: 12),
 
                 // Storefront grid
-                Expanded(
-                  child: _filteredProducts.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.search_off_outlined, size: 48, color: Colors.grey.shade400),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Produk tidak ditemukan',
-                                style: TextStyle(color: Colors.grey.shade600),
-                              ),
-                            ],
-                          ),
-                        )
-                      : GridView.builder(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 0.72,
-                          ),
-                          itemCount: _filteredProducts.length,
-                          itemBuilder: (context, index) {
-                            final product = _filteredProducts[index];
+                () {
+                  final totalItems = _filteredProducts.length;
+                  final startIndex = (_currentPage - 1) * 10;
+                  final endIndex = startIndex + 10 > totalItems ? totalItems : startIndex + 10;
+                  final paginatedProducts = totalItems == 0 
+                      ? <Product>[] 
+                      : _filteredProducts.sublist(startIndex, endIndex);
+
+                  return Expanded(
+                    child: paginatedProducts.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.search_off_outlined, size: 48, color: Colors.grey.shade400),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Produk tidak ditemukan',
+                                  style: TextStyle(color: Colors.grey.shade600),
+                                ),
+                              ],
+                            ),
+                          )
+                        : GridView.builder(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 0.72,
+                            ),
+                            itemCount: paginatedProducts.length,
+                            itemBuilder: (context, index) {
+                              final product = paginatedProducts[index];
                             return GestureDetector(
                               onTap: () => _showProductDetails(product),
                               child: Card(
@@ -651,9 +662,63 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                             );
                           },
                         ),
-                ),
+                  );
+                }(),
+                _buildPaginationControls(theme),
               ],
             ),
           );
+  }
+
+  Widget _buildPaginationControls(ThemeData theme) {
+    final totalPages = (_filteredProducts.length / 10).ceil();
+    if (totalPages <= 1) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          onPressed: _currentPage > 1 ? () => setState(() => _currentPage--) : null,
+          icon: const Icon(Icons.chevron_left),
+          color: theme.colorScheme.primary,
+        ),
+        ...List.generate(totalPages, (index) {
+          final pageNum = index + 1;
+          final isSelected = pageNum == _currentPage;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: InkWell(
+              onTap: () => setState(() => _currentPage = pageNum),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                  border: Border.all(
+                    color: isSelected ? theme.colorScheme.primary : Colors.grey.shade300,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '$pageNum',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isSelected ? Colors.white : Colors.black87,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+        IconButton(
+          onPressed: _currentPage < totalPages ? () => setState(() => _currentPage++) : null,
+          icon: const Icon(Icons.chevron_right),
+          color: theme.colorScheme.primary,
+        ),
+      ],
+    );
   }
 }
