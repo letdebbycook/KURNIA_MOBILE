@@ -10,20 +10,26 @@ Platform ini dirancang untuk operasional ritel modern, mengintegrasikan sistem p
 
 ### 1. Sisi Pelanggan (Customer Features)
 * **Katalog Belanja Interaktif**: Halaman storefront modern dengan dukungan pencarian produk real-time dan tata letak grid yang responsif.
+* **Pagination Katalog**: Storefront pelanggan dibatasi secara visual dengan pagination 10 produk per halaman untuk efisiensi transfer data dan kemudahan navigasi.
 * **Sistem Wishlist Reaktif**: Menyimpan produk favorit secara in-memory menggunakan `ChangeNotifier` dengan indikator counter badge dinamis dan gestur *Swipe-to-Dismiss* untuk menghapus item.
+* **Integrasi RajaOngkir (Real-time Shipping)**: Perhitungan biaya pengiriman secara real-time via API RajaOngkir Starter (JNE, POS, TIKI) dengan fallback ongkir statis yang aman jika layanan pihak ketiga terganggu.
 * **Optimasi Checkout**: Pemrosesan transaksi paralel menggunakan `Future.wait()` untuk menjamin performa respons di bawah 300ms.
-* **Integrasi Midtrans Snap**: Pembayaran aman menggunakan overlay Snap JS SDK (di Web) dan peluncuran redirect eksternal secara asinkron dengan fallback penanganan popup blocker.
-* **Pelacakan Pengiriman (Order Stepper)**: Indikator visual real-time pelacakan status pesanan pelanggan: **Bayar ➔ Dikemas ➔ Diantar ➔ Selesai**.
+* **Integrasi Midtrans Snap & Multi-platform Compatibility**: Pembayaran aman terintegrasi dengan Midtrans Snap API (Sandbox). Di Web menggunakan overlay JS SDK, sedangkan di platform Android/iOS native secara dinamis dialihkan (redirect) ke browser eksternal via `url_launcher` tanpa dependensi `dart:js` yang dapat merusak build native.
+* **Pelacakan Pengiriman (Order Stepper)**: Indikator visual real-time pelacakan status pesanan pelanggan: **Bayar ➔ Dikemas ➔ Diantar ➔ Selesai**. Detail kurir dan ongkir yang tersemat pada metode bayar ditampilkan secara otomatis pada detail transaksi.
 * **Konfirmasi Barang Diterima**: Tombol interaktif bagi pelanggan untuk menandai pesanan selesai secara mandiri ketika status kurir telah `Diantar`.
 * **Pembatalan Pesanan**: Pelanggan dapat membatalkan dan menghapus transaksi secara permanen jika status pembayaran masih `Pending` (Belum Bayar).
 
 ### 2. Sisi Administrator (Admin Features)
-* **Manajemen Katalog**: Operasi CRUD produk lengkap dengan kompresi gambar otomatis dan konversi gambar galeri/kamera menjadi string **Base64** secara asinkron sebelum disimpan ke database.
+* **Manajemen & CRUD Katalog**: Operasi CRUD produk lengkap:
+  * **CREATE**: Menambahkan produk baru dengan gambar galeri/kamera (Base64) atau URL.
+  * **READ**: Meninjau detail produk lengkap melalui Bottom Sheet interaktif di dashboard admin.
+  * **UPDATE**: Mengedit informasi produk, mengubah nama, deskripsi (max 255 karakter), harga, dan mengganti gambar produk secara dinamis dengan preview sebelum disimpan.
+* **Pagination Katalog Admin**: Halaman manajemen produk admin menggunakan pagination 10 produk per halaman dengan navigasi visual yang konsisten.
 * **Dashboard Statistik Penjualan**: Laporan grafis real-time untuk pendapatan harian (minggu berjalan) dan akumulasi bulanan. Laporan ini secara ketat memfilter dan **hanya menghitung pesanan dengan status lunas/berhasil** (`success`, `settlement`, `capture`) guna menjamin validitas pembukuan keuangan.
 * **Modul ML Insights**: Modul analitik tersemat yang memproses data transaksi produk kain:
   * *Segmentasi*: Visualisasi distribusi cluster perputaran produk (**Fast, Medium, Slow Moving**).
   * *Prediksi*: Form simulasi parameter penjualan (Quantity, Value, Total) untuk memprediksi kelas perputaran barang berbasis klasifikasi Random Forest.
-* **Kelola Pesanan (Order Management)**: Panel khusus bagi admin untuk memantau alamat pengiriman pelanggan secara lengkap, menyaring pesanan berdasarkan status, dan memajukan siklus pengiriman (`dikemas` ➔ `diantar` ➔ `selesai`).
+* **Kelola Pesanan (Order Management)**: Panel khusus bagi admin untuk memantau alamat pengiriman pelanggan secara lengkap, menyaring pesanan berdasarkan status, memajukan siklus pengiriman (`dikemas` ➔ `diantar` ➔ `selesai`), serta melihat detail kurir dan ongkir yang digunakan pelanggan.
 
 ---
 
@@ -36,6 +42,7 @@ Platform ini mengadopsi pola arsitektur **Layered Architecture / Clean Code** se
 * **Backend Bridge**: Native PHP API dengan validasi JWT (JSON Web Token) untuk otentikasi login/register dan reset kata sandi berbasis token.
 * **Database**: MySQL (MariaDB) dengan engine InnoDB untuk integritas relasi foreign key.
 * **Payment Gateway**: Midtrans Snap API (Sandbox Mode).
+* **Integrasi Ongkir**: RajaOngkir Starter API (kalkulasi pengiriman dinamis).
 * **Integrasi ML**: Embedded CSV Parser (`csv: ^6.0.0`) untuk evaluasi data analitik model clustering in-app.
 
 ### Struktur Direktori Utama Flutter
@@ -50,7 +57,10 @@ lib/
 ├── services/
 │   ├── cart_service.dart        # Logika bisnis keranjang (singleton)
 │   ├── database_service.dart    # Service API Bridge & Query MySQL Native
+│   ├── js_helper.dart           # Interface/stub helper JS cross-platform (Native)
+│   ├── js_helper_web.dart       # Implementasi helper JS untuk target Web
 │   ├── ml_service.dart          # Pengolah data CSV & Decision Tree Classifier
+│   ├── ongkir_service.dart      # Kalkulator ongkos kirim real-time via RajaOngkir
 │   └── wishlist_service.dart    # State Management Wishlist Pelanggan
 ├── views/
 │   ├── admin/                   # Panel Dashboard Admin, Stats, ML, & Kelola Pesanan
@@ -106,6 +116,13 @@ CREATE TABLE IF NOT EXISTS transaksi (
   FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
+
+---
+
+## 📊 Seeder Database
+
+### Seeder Produk Kain Berbasis ML Insights
+Terdapat seeder SQL (`scratch/seed_fabrics.sql`) untuk menginisialisasi 25 produk kain premium yang disesuaikan dengan model ML insight. Deskripsi produk dibuat dengan bahasa pemasaran yang persuasif (menjual) dan mematuhi batas constraint panjang karakter di database (`VARCHAR(255)`).
 
 ---
 
