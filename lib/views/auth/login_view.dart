@@ -331,62 +331,6 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     const SizedBox(height: 16),
-
-                    // Quick Test Credentials Box (Pre-seeded helper)
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.colorScheme.primary.withOpacity(0.15),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                size: 16,
-                                color: theme.colorScheme.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Kredensial untuk Demo Pengujian:',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.primary,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Akses Admin:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                                  Text('User: admin / Pass: admin', style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
-                                ],
-                              ),
-                              Container(height: 20, width: 1, color: Colors.grey.shade300),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Akses Pelanggan:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                                  Text('User: customer / Pass: customer', style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
-                                ],
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),
