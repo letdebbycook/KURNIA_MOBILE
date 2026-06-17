@@ -309,6 +309,20 @@ class DatabaseService {
 
   Future<bool> updateProduct(Product product) async {
     if (kIsWeb) {
+      try {
+        final payload = product.toJson();
+        final response = await http.post(
+          Uri.parse('$_baseUrl?action=update_product'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(payload),
+        );
+        if (response.statusCode == 200) {
+          final res = jsonDecode(response.body);
+          return res['status'] == 'success';
+        }
+      } catch (e) {
+        print('Web update product error: $e');
+      }
       return false;
     }
 
