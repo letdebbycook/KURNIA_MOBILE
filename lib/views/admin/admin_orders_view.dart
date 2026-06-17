@@ -274,7 +274,23 @@ class _AdminOrdersViewState extends State<AdminOrdersView> {
                     if (order.midtransOrderId.isNotEmpty)
                       _buildInvoiceRow('ID Order Midtrans', order.midtransOrderId),
                     _buildInvoiceRow('Tanggal & Waktu', _formatDateTime(order.timestamp)),
-                    _buildInvoiceRow('Metode Pembayaran', order.metodeBayar),
+                    () {
+                      String courierInfo = '-';
+                      String basePaymentMethod = order.metodeBayar;
+                      if (order.metodeBayar.contains('(') && order.metodeBayar.contains(')')) {
+                        final startIndex = order.metodeBayar.indexOf('(') + 1;
+                        final endIndex = order.metodeBayar.indexOf(')');
+                        courierInfo = order.metodeBayar.substring(startIndex, endIndex);
+                        basePaymentMethod = order.metodeBayar.substring(0, startIndex - 1).trim();
+                      }
+                      return Column(
+                        children: [
+                          _buildInvoiceRow('Metode Pembayaran', basePaymentMethod),
+                          if (courierInfo != '-')
+                            _buildInvoiceRow('Kurir & Ongkir', courierInfo),
+                        ],
+                      );
+                    }(),
                     _buildInvoiceRow('Status Pembayaran', order.statusPembayaran, isStatus: true, isPayment: true),
                     
                     const SizedBox(height: 12),

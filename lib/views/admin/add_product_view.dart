@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/database_service.dart';
 import '../../models/product.dart';
+import '../../widgets/product_image_helper.dart';
 
 class AddProductView extends StatefulWidget {
-  const AddProductView({super.key});
+  final Product? product;
+  const AddProductView({super.key, this.product});
 
   @override
   State<AddProductView> createState() => _AddProductViewState();
@@ -29,6 +31,25 @@ class _AddProductViewState extends State<AddProductView> {
   void initState() {
     super.initState();
     _dbService.init();
+    if (widget.product != null) {
+      _nameController.text = widget.product!.name;
+      _descriptionController.text = widget.product!.description;
+      _priceController.text = widget.product!.price.toStringAsFixed(0);
+      if (widget.product!.imageUrl.startsWith('data:image/')) {
+        try {
+          final commaIndex = widget.product!.imageUrl.indexOf(',');
+          if (commaIndex != -1) {
+            final base64Str = widget.product!.imageUrl.substring(commaIndex + 1);
+            _pickedImageBytes = base64Decode(base64Str);
+            _pickedImageName = 'gambar_katalog.jpg';
+          }
+        } catch (e) {
+          debugPrint('Error parsing initial base64 image: $e');
+        }
+      } else if (widget.product!.imageUrl.isNotEmpty) {
+        _pickedImageName = 'Gambar Jaringan';
+      }
+    }
   }
 
   @override
@@ -164,7 +185,7 @@ class _AddProductViewState extends State<AddProductView> {
   void _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_pickedImageBytes == null) {
+    if (_pickedImageBytes == null && (widget.product == null || widget.product!.imageUrl.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Row(
@@ -192,17 +213,22 @@ class _AddProductViewState extends State<AddProductView> {
     final description = _descriptionController.text.trim();
     final price = double.tryParse(_priceController.text.trim()) ?? 0.0;
 
-    // Convert image bytes to base64 data URI for storage
-    final base64Image = 'data:image/jpeg;base64,${base64Encode(_pickedImageBytes!)}';
+    String base64Image = widget.product?.imageUrl ?? '';
+    if (_pickedImageBytes != null) {
+      base64Image = 'data:image/jpeg;base64,${base64Encode(_pickedImageBytes!)}';
+    }
 
     final newProduct = Product(
+      idProduk: widget.product?.idProduk,
       name: name,
       description: description,
       price: price,
       imageUrl: base64Image,
     );
 
-    final success = await _dbService.insertProduct(newProduct);
+    final success = widget.product != null
+        ? await _dbService.updateProduct(newProduct)
+        : await _dbService.insertProduct(newProduct);
 
     if (!mounted) return;
 
@@ -217,7 +243,9 @@ class _AddProductViewState extends State<AddProductView> {
             children: [
               const Icon(Icons.check_circle, color: Colors.white),
               const SizedBox(width: 8),
-              Text('Katalog "$name" berhasil ditambah!'),
+              Text(widget.product != null
+                  ? 'Katalog "$name" berhasil diubah!'
+                  : 'Katalog "$name" berhasil ditambah!'),
             ],
           ),
           backgroundColor: Colors.green.shade600,
@@ -229,12 +257,14 @@ class _AddProductViewState extends State<AddProductView> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.error_outline, color: Colors.white),
-              SizedBox(width: 8),
+              const Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 8),
               Expanded(
-                child: Text('Gagal menambah katalog. Nama produk sudah ada atau data tidak valid!'),
+                child: Text(widget.product != null
+                    ? 'Gagal mengubah katalog. Nama produk sudah ada atau data tidak valid!'
+                    : 'Gagal menambah katalog. Nama produk sudah ada atau data tidak valid!'),
               ),
             ],
           ),
@@ -258,7 +288,7 @@ class _AddProductViewState extends State<AddProductView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Katalog Baru'),
+        title: Text(widget.product != null ? 'Ubah Detail Produk' : 'Tambah Katalog Baru'),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
       ),
@@ -363,17 +393,17 @@ class _AddProductViewState extends State<AddProductView> {
               GestureDetector(
                 onTap: _showImageSourceSheet,
                 child: Container(
-                  height: _pickedImageBytes != null ? 220 : 160,
+                  height: (_pickedImageBytes != null || (widget.product != null && widget.product!.imageUrl.isNotEmpty)) ? 220 : 160,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: _pickedImageBytes != null
+                      color: (_pickedImageBytes != null || (widget.product != null && widget.product!.imageUrl.isNotEmpty))
                           ? theme.colorScheme.primary
                           : Colors.grey.shade300,
-                      width: _pickedImageBytes != null ? 2 : 1.5,
+                      width: (_pickedImageBytes != null || (widget.product != null && widget.product!.imageUrl.isNotEmpty)) ? 2 : 1.5,
                       strokeAlign: BorderSide.strokeAlignInside,
                     ),
                     borderRadius: BorderRadius.circular(16),
-                    color: _pickedImageBytes != null
+                    color: (_pickedImageBytes != null || (widget.product != null && widget.product!.imageUrl.isNotEmpty))
                         ? null
                         : Colors.grey.shade50,
                   ),
@@ -420,22 +450,13 @@ class _AddProductViewState extends State<AddProductView> {
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ),
-                                    Text(
-                                      _formatFileSize(_pickedImageBytes!.length),
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 11,
-                                      ),
+                                      flex: 1,
                                     ),
                                   ],
                                 ),
                               ),
                             ),
-                            // Change / Remove buttons
                             Positioned(
                               top: 8,
                               right: 8,
@@ -463,7 +484,68 @@ class _AddProductViewState extends State<AddProductView> {
                             ),
                           ],
                         )
-                      : Column(
+                      : (widget.product != null && widget.product!.imageUrl.isNotEmpty)
+                          ? Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: ProductImageHelper.buildProductImage(
+                                    widget.product!.imageUrl,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.black.withValues(alpha: 0.7),
+                                        ],
+                                      ),
+                                      borderRadius: const BorderRadius.vertical(
+                                        bottom: Radius.circular(14),
+                                      ),
+                                    ),
+                                    child: const Row(
+                                      children: [
+                                        Icon(Icons.image, color: Colors.white, size: 16),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          'Foto Produk Saat Ini',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: Row(
+                                    children: [
+                                      _buildOverlayButton(
+                                        icon: Icons.edit,
+                                        tooltip: 'Ganti Gambar',
+                                        onTap: _showImageSourceSheet,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
@@ -528,9 +610,9 @@ class _AddProductViewState extends State<AddProductView> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text(
-                        'TAMBAHKAN KATALOG',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 1),
+                    : Text(
+                        widget.product != null ? 'SIMPAN PERUBAHAN' : 'TAMBAHKAN KATALOG',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 1),
                       ),
               ),
             ],
