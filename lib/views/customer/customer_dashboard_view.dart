@@ -5,6 +5,7 @@ import '../../services/wishlist_service.dart';
 import '../../models/product.dart';
 import '../../widgets/product_image_helper.dart';
 import '../auth/login_view.dart';
+import '../shared/notifikasi_view.dart';
 import 'cart_view.dart';
 import 'profile_view.dart';
 import 'order_history_view.dart';
@@ -301,6 +302,51 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                 );
               },
             ),
+          FutureBuilder<int>(
+            future: _dbService.getUnreadNotificationCount(widget.idUser),
+            builder: (context, snapshot) {
+              final unreadCount = snapshot.data ?? 0;
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_none_outlined),
+                    tooltip: 'Notifikasi',
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotifikasiView(
+                            idUser: widget.idUser,
+                            role: 'customer',
+                          ),
+                        ),
+                      );
+                      setState(() {});
+                    },
+                  ),
+                  if (unreadCount > 0)
+                    Positioned(
+                      right: 6,
+                      top: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$unreadCount',
+                          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
