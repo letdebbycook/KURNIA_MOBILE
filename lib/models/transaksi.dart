@@ -1,3 +1,5 @@
+import 'detail_transaksi.dart';
+
 class Transaksi {
   final int? idTransaksi;
   final int idUser;
@@ -12,6 +14,7 @@ class Transaksi {
   final String? userNama;
   final String? userTelepon;
   final String? userAlamat;
+  final List<DetailTransaksi>? items;
 
   Transaksi({
     this.idTransaksi,
@@ -27,6 +30,7 @@ class Transaksi {
     this.userNama,
     this.userTelepon,
     this.userAlamat,
+    this.items = const [],
   });
 
   Map<String, dynamic> toJson() => {
@@ -43,6 +47,7 @@ class Transaksi {
         'user_nama': userNama,
         'user_telepon': userTelepon,
         'user_alamat': userAlamat,
+        'items': items?.map((item) => item.toJson()).toList(),
       };
 
   factory Transaksi.fromJson(Map<String, dynamic> json) => Transaksi(
@@ -59,5 +64,9 @@ class Transaksi {
         userNama: json['user_nama'] as String?,
         userTelepon: json['user_telepon'] as String?,
         userAlamat: json['user_alamat'] as String?,
+        items: (json['items'] as List<dynamic>?)
+                ?.map((item) => DetailTransaksi.fromJson(item as Map<String, dynamic>))
+                .toList() ??
+            [],
       );
 }
