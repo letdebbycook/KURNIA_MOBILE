@@ -3,6 +3,7 @@ import '../../services/database_service.dart';
 import '../../models/product.dart';
 import '../../widgets/product_image_helper.dart';
 import '../auth/login_view.dart';
+import '../shared/notifikasi_view.dart';
 import 'add_product_view.dart';
 import 'admin_orders_view.dart';
 import 'sales_statistics_view.dart';
@@ -189,6 +190,51 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
             icon: const Icon(Icons.refresh),
             onPressed: _loadProducts,
             tooltip: 'Segarkan data',
+          ),
+          FutureBuilder<int>(
+            future: _dbService.getUnreadNotificationCount(1),
+            builder: (context, snapshot) {
+              final unreadCount = snapshot.data ?? 0;
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_none_outlined),
+                    tooltip: 'Notifikasi Admin',
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotifikasiView(
+                            idUser: 1,
+                            role: 'admin',
+                          ),
+                        ),
+                      );
+                      setState(() {});
+                    },
+                  ),
+                  if (unreadCount > 0)
+                    Positioned(
+                      right: 6,
+                      top: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$unreadCount',
+                          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
           // Logout Button
           IconButton(
