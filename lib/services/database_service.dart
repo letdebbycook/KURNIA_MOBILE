@@ -6,6 +6,8 @@ import 'package:mysql1/mysql1.dart';
 import '../models/user.dart';
 import '../models/product.dart';
 import '../models/transaksi.dart';
+import '../models/detail_transaksi.dart';
+import '../models/notifikasi.dart';
 import '../models/user_profile.dart';
 import '../models/cart_item.dart';
 
@@ -652,28 +654,74 @@ class DatabaseService {
 
     final result = await conn.query(
       '''
-      SELECT t.*, u.nama AS user_nama, u.telepon AS user_telepon, u.alamat AS user_alamat
+      SELECT t.*, d.id_detail, d.id_produk, d.jumlah, d.harga_satuan, d.subtotal, p.nama AS nama_produk, p.imageUrl AS gambar_produk, u.nama AS user_nama, u.telepon AS user_telepon, u.alamat AS user_alamat
       FROM transaksi t
+      LEFT JOIN detail_transaksi d ON t.id_transaksi = d.id_transaksi
+      LEFT JOIN produk p ON d.id_produk = p.id_produk
       LEFT JOIN users u ON t.id_user = u.id_user
       ORDER BY t.id_transaksi DESC
       ''',
     );
 
-    return result.map((row) {
+    final Map<int, Map<String, dynamic>> txMap = {};
+    final Map<int, List<DetailTransaksi>> txItems = {};
+    final List<int> orderedIds = [];
+
+    for (var row in result) {
+      final id = row['id_transaksi'] as int;
+      if (!txMap.containsKey(id)) {
+        orderedIds.add(id);
+        txMap[id] = {
+          'id_transaksi': id,
+          'id_user': row['id_user'],
+          'metode_bayar': row['metode_bayar'],
+          'total': row['total'],
+          'productName': row['productName'],
+          'timestamp': row['timestamp'],
+          'status_pembayaran': row['status_pembayaran'],
+          'status_pesanan': row['status_pesanan'],
+          'midtrans_order_id': row['midtrans_order_id'],
+          'midtrans_redirect_url': row['midtrans_redirect_url'],
+          'user_nama': row['user_nama'],
+          'user_telepon': row['user_telepon'],
+          'user_alamat': row['user_alamat'],
+        };
+        txItems[id] = [];
+      }
+
+      if (row['id_detail'] != null) {
+        txItems[id]!.add(DetailTransaksi(
+          idDetail: row['id_detail'] as int?,
+          idTransaksi: id,
+          idProduk: row['id_produk'] as int,
+          namaProduk: (row['nama_produk'] as String?) ?? '',
+          gambarProduk: (row['gambar_produk'] as String?) ?? '',
+          jumlah: row['jumlah'] as int,
+          hargaSatuan: (row['harga_satuan'] as num).toDouble(),
+          subtotal: (row['subtotal'] as num).toDouble(),
+        ));
+      }
+    }
+
+    return orderedIds.map((id) {
+      final tx = txMap[id]!;
       return Transaksi(
-        idTransaksi: row['id_transaksi'],
-        idUser: row['id_user'],
-        metodeBayar: row['metode_bayar'],
-        total: (row['total'] as num).toDouble(),
-        productName: row['productName'] ?? '',
-        timestamp: DateTime.parse(row['timestamp'].toString()),
-        statusPembayaran: row['status_pembayaran'] ?? 'pending',
-        statusPesanan: row['status_pesanan'] ?? 'pending',
-        midtransOrderId: row['midtrans_order_id'] ?? '',
-        midtransRedirectUrl: row['midtrans_redirect_url'] ?? '',
-        userNama: row['user_nama'],
-        userTelepon: row['user_telepon'],
-        userAlamat: row['user_alamat'],
+        idTransaksi: id,
+        idUser: tx['id_user'] as int,
+        metodeBayar: (tx['metode_bayar'] as String?) ?? '',
+        total: (tx['total'] as num).toDouble(),
+        productName: (tx['productName'] as String?) ?? '',
+        timestamp: tx['timestamp'] is DateTime
+            ? tx['timestamp'] as DateTime
+            : DateTime.parse(tx['timestamp'].toString()),
+        statusPembayaran: (tx['status_pembayaran'] as String?) ?? 'pending',
+        statusPesanan: (tx['status_pesanan'] as String?) ?? 'pending',
+        midtransOrderId: (tx['midtrans_order_id'] as String?) ?? '',
+        midtransRedirectUrl: (tx['midtrans_redirect_url'] as String?) ?? '',
+        userNama: tx['user_nama'] as String?,
+        userTelepon: tx['user_telepon'] as String?,
+        userAlamat: tx['user_alamat'] as String?,
+        items: txItems[id],
       );
     }).toList();
   }
@@ -694,8 +742,10 @@ class DatabaseService {
 
     final result = await conn.query(
       '''
-      SELECT t.*, u.nama AS user_nama, u.telepon AS user_telepon, u.alamat AS user_alamat
+      SELECT t.*, d.id_detail, d.id_produk, d.jumlah, d.harga_satuan, d.subtotal, p.nama AS nama_produk, p.imageUrl AS gambar_produk, u.nama AS user_nama, u.telepon AS user_telepon, u.alamat AS user_alamat
       FROM transaksi t
+      LEFT JOIN detail_transaksi d ON t.id_transaksi = d.id_transaksi
+      LEFT JOIN produk p ON d.id_produk = p.id_produk
       LEFT JOIN users u ON t.id_user = u.id_user
       WHERE t.id_user = ?
       ORDER BY t.id_transaksi DESC
@@ -703,21 +753,65 @@ class DatabaseService {
       [idUser],
     );
 
-    return result.map((row) {
+    final Map<int, Map<String, dynamic>> txMap = {};
+    final Map<int, List<DetailTransaksi>> txItems = {};
+    final List<int> orderedIds = [];
+
+    for (var row in result) {
+      final id = row['id_transaksi'] as int;
+      if (!txMap.containsKey(id)) {
+        orderedIds.add(id);
+        txMap[id] = {
+          'id_transaksi': id,
+          'id_user': row['id_user'],
+          'metode_bayar': row['metode_bayar'],
+          'total': row['total'],
+          'productName': row['productName'],
+          'timestamp': row['timestamp'],
+          'status_pembayaran': row['status_pembayaran'],
+          'status_pesanan': row['status_pesanan'],
+          'midtrans_order_id': row['midtrans_order_id'],
+          'midtrans_redirect_url': row['midtrans_redirect_url'],
+          'user_nama': row['user_nama'],
+          'user_telepon': row['user_telepon'],
+          'user_alamat': row['user_alamat'],
+        };
+        txItems[id] = [];
+      }
+
+      if (row['id_detail'] != null) {
+        txItems[id]!.add(DetailTransaksi(
+          idDetail: row['id_detail'] as int?,
+          idTransaksi: id,
+          idProduk: row['id_produk'] as int,
+          namaProduk: (row['nama_produk'] as String?) ?? '',
+          gambarProduk: (row['gambar_produk'] as String?) ?? '',
+          jumlah: row['jumlah'] as int,
+          hargaSatuan: (row['harga_satuan'] as num).toDouble(),
+          subtotal: (row['subtotal'] as num).toDouble(),
+        ));
+      }
+    }
+
+    return orderedIds.map((id) {
+      final tx = txMap[id]!;
       return Transaksi(
-        idTransaksi: row['id_transaksi'],
-        idUser: row['id_user'],
-        metodeBayar: row['metode_bayar'],
-        total: (row['total'] as num).toDouble(),
-        productName: row['productName'] ?? '',
-        timestamp: DateTime.parse(row['timestamp'].toString()),
-        statusPembayaran: row['status_pembayaran'] ?? 'pending',
-        statusPesanan: row['status_pesanan'] ?? 'pending',
-        midtransOrderId: row['midtrans_order_id'] ?? '',
-        midtransRedirectUrl: row['midtrans_redirect_url'] ?? '',
-        userNama: row['user_nama'],
-        userTelepon: row['user_telepon'],
-        userAlamat: row['user_alamat'],
+        idTransaksi: id,
+        idUser: tx['id_user'] as int,
+        metodeBayar: (tx['metode_bayar'] as String?) ?? '',
+        total: (tx['total'] as num).toDouble(),
+        productName: (tx['productName'] as String?) ?? '',
+        timestamp: tx['timestamp'] is DateTime
+            ? tx['timestamp'] as DateTime
+            : DateTime.parse(tx['timestamp'].toString()),
+        statusPembayaran: (tx['status_pembayaran'] as String?) ?? 'pending',
+        statusPesanan: (tx['status_pesanan'] as String?) ?? 'pending',
+        midtransOrderId: (tx['midtrans_order_id'] as String?) ?? '',
+        midtransRedirectUrl: (tx['midtrans_redirect_url'] as String?) ?? '',
+        userNama: tx['user_nama'] as String?,
+        userTelepon: tx['user_telepon'] as String?,
+        userAlamat: tx['user_alamat'] as String?,
+        items: txItems[id],
       );
     }).toList();
   }
@@ -845,6 +939,76 @@ class DatabaseService {
     );
 
     return result.first['jumlah'];
+  }
+
+  // ======================================================
+  // NOTIFIKASI
+  // ======================================================
+
+  Future<List<Notifikasi>> getNotifications(int idUser) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.get(Uri.parse('$_baseUrl?action=get_notifications&id_user=$idUser'));
+        if (response.statusCode == 200) {
+          final List<dynamic> list = jsonDecode(response.body);
+          return list.map((item) => Notifikasi.fromJson(item)).toList();
+        }
+      } catch (e) {
+        print('Web get notifications error: $e');
+      }
+      return [];
+    }
+
+    try {
+      final result = await conn.query(
+        'SELECT * FROM notifikasi WHERE id_user = ? ORDER BY id_notifikasi DESC',
+        [idUser],
+      );
+      return result.map((row) {
+        return Notifikasi(
+          idNotifikasi: row['id_notifikasi'],
+          idUser: row['id_user'],
+          judul: row['judul'] ?? '',
+          pesan: row['pesan'] ?? '',
+          isRead: row['is_read'] == 1,
+          timestamp: DateTime.parse(row['timestamp'].toString()),
+        );
+      }).toList();
+    } catch (e) {
+      print('Native get notifications error: $e');
+      return [];
+    }
+  }
+
+  Future<bool> markNotificationsAsRead(int idUser) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.get(Uri.parse('$_baseUrl?action=mark_notifications_read&id_user=$idUser'));
+        if (response.statusCode == 200) {
+          final res = jsonDecode(response.body);
+          return res['status'] == 'success';
+        }
+      } catch (e) {
+        print('Web mark notifications read error: $e');
+      }
+      return false;
+    }
+
+    try {
+      await conn.query(
+        'UPDATE notifikasi SET is_read = 1 WHERE id_user = ?',
+        [idUser],
+      );
+      return true;
+    } catch (e) {
+      print('Native mark notifications read error: $e');
+      return false;
+    }
+  }
+
+  Future<int> getUnreadNotificationCount(int idUser) async {
+    final list = await getNotifications(idUser);
+    return list.where((n) => !n.isRead).length;
   }
 
   Future<void> close() async {
