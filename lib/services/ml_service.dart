@@ -248,6 +248,30 @@ class MlService {
             final val = row[i].toString().trim();
             result[headers[i]] = double.tryParse(val) ?? val;
           }
+
+          final pfco = result['PFco_Code']?.toString() ?? '';
+          final csvSeg = result['segment']?.toString() ?? 'slow moving';
+          result['csv_segment'] = csvSeg;
+
+          final rawQty = double.tryParse(result['avg_qty_per_trx']?.toString() ?? '0') ?? 0.0;
+          final scaledQty = MlScaler.scaleQuantity(pfco, rawQty, csvSeg);
+
+          String dynamicSeg;
+          int dynamicCluster;
+          if (scaledQty >= 70.0) {
+            dynamicSeg = 'fast moving';
+            dynamicCluster = 1;
+          } else if (scaledQty >= 45.0) {
+            dynamicSeg = 'medium moving';
+            dynamicCluster = 2;
+          } else {
+            dynamicSeg = 'slow moving';
+            dynamicCluster = 0;
+          }
+
+          result['segment'] = dynamicSeg;
+          result['cluster_id'] = dynamicCluster;
+
           return result;
         }).toList();
       }
@@ -456,10 +480,10 @@ class MlService {
         (cr) => cr['PFco_Code']?.toString().trim() == pfcoCode.trim(),
       );
       
-      final segment = cr['segment']?.toString() ?? 'slow moving';
+      final csvSeg = cr['csv_segment']?.toString() ?? 'slow moving';
       final rawQty = double.tryParse(cr['avg_qty_per_trx']?.toString() ?? '0') ?? 0.0;
       
-      final scaledQty = MlScaler.scaleQuantity(pfcoCode, rawQty, segment);
+      final scaledQty = MlScaler.scaleQuantity(pfcoCode, rawQty, csvSeg);
       final finalPrice = MlScaler.getFabricPrice(pfcoCode);
       final scaledTotal = scaledQty * finalPrice;
       
@@ -568,61 +592,31 @@ class MlService {
     required double value,
     required double totalValues,
   }) {
-    int score = 0;
-
-    if (totalValues >= _fastMovingTotalThreshold) {
-      score += 2;
-    } else if (totalValues >= _mediumMovingTotalThreshold) {
-      score += 1;
-    }
-
-    if (quantitiesKgs >= _fastMovingQtyThreshold) {
-      score += 2;
-    } else if (quantitiesKgs >= _mediumMovingQtyThreshold) {
-      score += 1;
-    }
-
-    if (value >= _fastMovingValueThreshold) {
-      score += 2;
-    } else if (value >= _mediumMovingValueThreshold) {
-      score += 1;
-    }
-
-    if (quantitiesKgs > 0) {
-      final ratio = totalValues / quantitiesKgs;
-      if (ratio >= 130000) {
-        score += 2;
-      } else if (ratio >= 90000) {
-        score += 1;
-      }
-    }
-
     String segment;
     int cluster;
     double confidence;
     String reasoning;
 
-    if (score >= 6) {
+    if (quantitiesKgs >= _fastMovingQtyThreshold) {
       segment = 'fast moving';
       cluster = 1;
-      confidence = _clampConfidence(0.70 + (score - 6) * 0.05);
+      confidence = 0.95;
       reasoning =
-          'Produk menunjukkan volume tinggi (${quantitiesKgs.toStringAsFixed(0)} unit), '
-          'nilai transaksi besar, dan total values sangat tinggi. '
+          'Produk memiliki frekuensi penjualan tinggi (${quantitiesKgs.toStringAsFixed(0)} unit). '
           'Kategori ini memerlukan stok yang selalu tersedia dan replenishment cepat.';
-    } else if (score >= 3) {
+    } else if (quantitiesKgs >= _mediumMovingQtyThreshold) {
       segment = 'medium moving';
       cluster = 2;
-      confidence = _clampConfidence(0.65 + (score - 3) * 0.05);
+      confidence = 0.85;
       reasoning =
-          'Produk memiliki pergerakan sedang dengan volume ${quantitiesKgs.toStringAsFixed(0)} unit. '
+          'Produk memiliki frekuensi penjualan sedang (${quantitiesKgs.toStringAsFixed(0)} unit). '
           'Disarankan untuk menjaga stok secukupnya dan monitor tren permintaan secara berkala.';
     } else {
       segment = 'slow moving';
       cluster = 0;
-      confidence = _clampConfidence(0.75 + (3 - score) * 0.05);
+      confidence = 0.90;
       reasoning =
-          'Produk termasuk kategori pergerakan lambat (${quantitiesKgs.toStringAsFixed(0)} unit). '
+          'Produk memiliki frekuensi penjualan rendah (${quantitiesKgs.toStringAsFixed(0)} unit). '
           'Pertimbangkan strategi promosi atau bundling untuk meningkatkan perputaran stok.';
     }
 
@@ -631,7 +625,7 @@ class MlService {
       'cluster': cluster,
       'confidence': confidence,
       'reasoning': reasoning,
-      'score': score,
+      'score': quantitiesKgs.toInt(),
     };
   }
 

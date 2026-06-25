@@ -63,6 +63,15 @@ class RekomendasiOperasional {
         restock = restock.clamp(20.0, 125.0);
       }
     }
+
+    String dynamicSeg;
+    if (need >= 70.0) {
+      dynamicSeg = 'fast moving';
+    } else if (need >= 45.0) {
+      dynamicSeg = 'medium moving';
+    } else {
+      dynamicSeg = 'slow moving';
+    }
     
     String finalSuggestion = '';
     switch (risk) {
@@ -81,7 +90,7 @@ class RekomendasiOperasional {
 
     return RekomendasiOperasional(
       pfcoCode: pfco,
-      segment: seg,
+      segment: dynamicSeg,
       riskCategory: risk,
       priority: row[3].toString().trim(),
       action: row[4].toString().trim(),

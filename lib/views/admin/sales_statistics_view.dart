@@ -16,6 +16,7 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
   List<Transaksi> _orders = [];
   bool _isLoading = true;
   bool _hasError = false;
+  String _selectedPeriod = '1 Minggu';
 
   @override
   void initState() {
@@ -64,36 +65,112 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
         const SnackBar(
           content: Text('Gagal mengambil data transaksi dari server!'),
           backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
   }
 
+  List<Transaksi> get _filteredOrders {
+    final now = DateTime.now();
+    DateTime cutoff;
+    switch (_selectedPeriod) {
+      case '1 Hari':
+        cutoff = DateTime(now.year, now.month, now.day);
+        break;
+      case '1 Minggu':
+        cutoff = now.subtract(const Duration(days: 7));
+        break;
+      case '1 Bulan':
+        cutoff = now.subtract(const Duration(days: 30));
+        break;
+      case '1 Tahun':
+        cutoff = now.subtract(const Duration(days: 365));
+        break;
+      default:
+        cutoff = now.subtract(const Duration(days: 7));
+    }
+    return _orders.where((order) => order.timestamp.isAfter(cutoff) || order.timestamp.isAtSameMomentAs(cutoff)).toList();
+  }
+
   double get _totalSales {
-    return _orders.fold(0.0, (sum, order) => sum + order.total);
+    return _filteredOrders.fold(0.0, (sum, order) => sum + order.total);
+  }
+
+  Map<int, double> _getHourlySalesData(List<Transaksi> filtered) {
+    final Map<int, double> hourlyMap = {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0};
+    for (var order in filtered) {
+      final hour = order.timestamp.hour;
+      final block = hour ~/ 4;
+      if (block >= 0 && block < 6) {
+        hourlyMap[block] = (hourlyMap[block] ?? 0.0) + order.total;
+      }
+    }
+    return hourlyMap;
   }
 
   // Prepares data for Daily Statistics (Mon - Sun grouping based on real timestamps)
-  Map<int, double> _getDailySalesData() {
+  Map<int, double> _getDailySalesData(List<Transaksi> filtered) {
     final Map<int, double> dailyMap = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0, 6: 0.0, 7: 0.0};
-    for (var order in _orders) {
+    for (var order in filtered) {
       final weekday = order.timestamp.weekday;
       dailyMap[weekday] = (dailyMap[weekday] ?? 0.0) + order.total;
     }
     return dailyMap;
   }
 
+  Map<int, double> _getWeeklySalesData(List<Transaksi> filtered) {
+    final Map<int, double> weeklyMap = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0};
+    final now = DateTime.now();
+    for (var order in filtered) {
+      final diffDays = now.difference(order.timestamp).inDays;
+      int week = 4 - (diffDays ~/ 7);
+      if (week < 1) week = 1;
+      if (week > 4) week = 4;
+      weeklyMap[week] = (weeklyMap[week] ?? 0.0) + order.total;
+    }
+    return weeklyMap;
+  }
+
   // Prepares data for Monthly Statistics (Jan - Dec grouping)
-  Map<int, double> _getMonthlySalesData() {
+  Map<int, double> _getMonthlySalesData(List<Transaksi> filtered) {
     final Map<int, double> monthlyMap = {};
     for (int i = 1; i <= 12; i++) {
       monthlyMap[i] = 0.0;
     }
-    for (var order in _orders) {
+    for (var order in filtered) {
       final month = order.timestamp.month;
       monthlyMap[month] = (monthlyMap[month] ?? 0.0) + order.total;
     }
     return monthlyMap;
+  }
+
+  List<ProductSalesSummary> _getProductSalesSummary(List<Transaksi> filtered) {
+    final Map<String, ProductSalesSummary> map = {};
+    for (var order in filtered) {
+      if (order.items != null && order.items!.isNotEmpty) {
+        for (var item in order.items!) {
+          final name = item.namaProduk;
+          if (map.containsKey(name)) {
+            map[name]!.quantity += item.jumlah;
+            map[name]!.revenue += item.subtotal;
+          } else {
+            map[name] = ProductSalesSummary(name: name, quantity: item.jumlah, revenue: item.subtotal);
+          }
+        }
+      } else {
+        final name = order.productName.isNotEmpty ? order.productName : 'Produk Lain';
+        if (map.containsKey(name)) {
+          map[name]!.quantity += 1;
+          map[name]!.revenue += order.total;
+        } else {
+          map[name] = ProductSalesSummary(name: name, quantity: 1, revenue: order.total);
+        }
+      }
+    }
+    final sorted = map.values.toList();
+    sorted.sort((a, b) => b.revenue.compareTo(a.revenue));
+    return sorted;
   }
 
   // Machine Learning Evaluation menggunakan data riil dari Random Forest & Clustering
@@ -124,7 +201,7 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
     });
 
     final totalTrx = _orders.length;
-    final averageBasket = _totalSales / totalTrx;
+    final averageBasket = _orders.isEmpty ? 0.0 : (_orders.fold(0.0, (sum, o) => sum + o.total) / totalTrx);
 
     return 'Berdasarkan analisis data transaksi menggunakan model Random Forest:\n\n'
         '• Produk terlaris saat ini: "$topProduct" ($maxCount transaksi).\n'
@@ -150,8 +227,9 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dailySales = _getDailySalesData();
-    final monthlySales = _getMonthlySalesData();
+    final filtered = _filteredOrders;
+    final dailySales = _getDailySalesData(filtered);
+    final monthlySales = _getMonthlySalesData(filtered);
 
     return Scaffold(
       appBar: AppBar(
@@ -189,6 +267,9 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Timeframe selector ChoiceChips
+                      _buildTimeframeSelector(theme),
+                      const SizedBox(height: 16),
                       // Header Dashboard Summary Card
                       Card(
                         elevation: 3,
@@ -199,9 +280,9 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'TOTAL PENJUALAN KURNIA (MySQL)',
-                                style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                              Text(
+                                'TOTAL PENJUALAN KURNIA ($_selectedPeriod)',
+                                style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
                               ),
                               const SizedBox(height: 8),
                               Text(
@@ -213,7 +294,7 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Total Transaksi: ${_orders.length} Order',
+                                    'Total Transaksi: ${filtered.length} Order',
                                     style: const TextStyle(color: Colors.white70, fontSize: 13),
                                   ),
                                   Container(
@@ -235,9 +316,15 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
                       ),
                       const SizedBox(height: 24),
 
-                      // Section: Daily Sales Graph
+                      // Section: Sales Graph
                       Text(
-                        'Statistik Penjualan Harian (Minggu Ini)',
+                        _selectedPeriod == '1 Hari'
+                            ? 'Grafik Penjualan Hari Ini (Per 4 Jam)'
+                            : _selectedPeriod == '1 Minggu'
+                                ? 'Statistik Penjualan Harian (Minggu Ini)'
+                                : _selectedPeriod == '1 Bulan'
+                                    ? 'Grafik Penjualan Mingguan (30 Hari Terakhir)'
+                                    : 'Grafik Penjualan Bulanan (1 Tahun Terakhir)',
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                       ),
                       const SizedBox(height: 12),
@@ -246,14 +333,20 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: _buildDailyChart(dailySales, theme),
+                          child: _selectedPeriod == '1 Hari'
+                              ? _buildHourlyChart(_getHourlySalesData(filtered), theme)
+                              : _selectedPeriod == '1 Minggu'
+                                  ? _buildDailyChart(dailySales, theme)
+                                  : _selectedPeriod == '1 Bulan'
+                                      ? _buildWeeklyChart(_getWeeklySalesData(filtered), theme)
+                                      : _buildMonthlyChart(monthlySales, theme),
                         ),
                       ),
                       const SizedBox(height: 24),
 
-                      // Section: Monthly Sales Graph
+                      // Section: Product sales details
                       Text(
-                        'Grafik Penjualan Bulanan (Total Akumulasi)',
+                        'Rincian Penjualan Produk',
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                       ),
                       const SizedBox(height: 12),
@@ -262,7 +355,7 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: _buildMonthlyChart(monthlySales, theme),
+                          child: _buildProductDetailsList(filtered, theme),
                         ),
                       ),
                       const SizedBox(height: 28),
@@ -328,15 +421,95 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
     );
   }
 
-  // Builds a premium custom visual chart for daily statistics
+  Widget _buildTimeframeSelector(ThemeData theme) {
+    final periods = ['1 Hari', '1 Minggu', '1 Bulan', '1 Tahun'];
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: periods.map((period) {
+        final isSelected = _selectedPeriod == period;
+        return ChoiceChip(
+          label: Text(
+            period,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: isSelected ? Colors.white : theme.colorScheme.primary,
+            ),
+          ),
+          selected: isSelected,
+          selectedColor: theme.colorScheme.primary,
+          backgroundColor: Colors.white,
+          side: BorderSide(color: theme.colorScheme.primary),
+          onSelected: (selected) {
+            if (selected) {
+              setState(() {
+                _selectedPeriod = period;
+              });
+            }
+          },
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildHourlyChart(Map<int, double> data, ThemeData theme) {
+    final labels = ['00-04', '04-08', '08-12', '12-16', '16-20', '20-24'];
+    double maxVal = 0.0;
+    data.forEach((k, v) {
+      if (v > maxVal) maxVal = v;
+    });
+    if (maxVal == 0.0) maxVal = 1.0;
+
+    return SizedBox(
+      height: 150,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: List.generate(6, (index) {
+          final value = data[index] ?? 0.0;
+          final percentage = value / maxVal;
+          final barHeight = percentage * 100;
+
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                value > 0 ? '${(value / 1000).toStringAsFixed(0)}k' : '-',
+                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black54),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                width: 22,
+                height: barHeight < 8 ? 8 : barHeight,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: value > 0
+                        ? [theme.colorScheme.primary, theme.colorScheme.primary.withOpacity(0.5)]
+                        : [Colors.grey.shade200, Colors.grey.shade300],
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                labels[index],
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
   Widget _buildDailyChart(Map<int, double> data, ThemeData theme) {
     final weekdays = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
     double maxVal = 0.0;
     data.forEach((k, v) {
       if (v > maxVal) maxVal = v;
     });
-
-    if (maxVal == 0.0) maxVal = 1.0; // Avoid divide by zero
+    if (maxVal == 0.0) maxVal = 1.0;
 
     return SizedBox(
       height: 150,
@@ -347,7 +520,7 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
           final dayNum = index + 1;
           final value = data[dayNum] ?? 0.0;
           final percentage = value / maxVal;
-          final barHeight = percentage * 100; // Cap height inside limits
+          final barHeight = percentage * 100;
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -357,10 +530,9 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
                 style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black54),
               ),
               const SizedBox(height: 6),
-              // Visual Gradient Bar
               Container(
                 width: 22,
-                height: barHeight < 8 ? 8 : barHeight, // Minimal height to keep visible
+                height: barHeight < 8 ? 8 : barHeight,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter,
@@ -384,20 +556,69 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
     );
   }
 
-  // Builds a premium custom visual list/progress chart for monthly stats
+  Widget _buildWeeklyChart(Map<int, double> data, ThemeData theme) {
+    final labels = ['Mng-3', 'Mng-2', 'Mng-1', 'Mng Ini'];
+    double maxVal = 0.0;
+    data.forEach((k, v) {
+      if (v > maxVal) maxVal = v;
+    });
+    if (maxVal == 0.0) maxVal = 1.0;
+
+    return SizedBox(
+      height: 150,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: List.generate(4, (index) {
+          final weekNum = index + 1;
+          final value = data[weekNum] ?? 0.0;
+          final percentage = value / maxVal;
+          final barHeight = percentage * 100;
+
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                value > 0 ? '${(value / 1000).toStringAsFixed(0)}k' : '-',
+                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black54),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                width: 32,
+                height: barHeight < 8 ? 8 : barHeight,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: value > 0
+                        ? [theme.colorScheme.primary, theme.colorScheme.primary.withOpacity(0.5)]
+                        : [Colors.grey.shade200, Colors.grey.shade300],
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                labels[index],
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
   Widget _buildMonthlyChart(Map<int, double> data, ThemeData theme) {
     final monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     double maxVal = 0.0;
     data.forEach((k, v) {
       if (v > maxVal) maxVal = v;
     });
-
     if (maxVal == 0.0) maxVal = 1.0;
 
-    // Filter only months that have sales, or show at least current month and a few others
     final activeMonths = data.keys.where((m) => data[m]! > 0).toList();
     if (activeMonths.isEmpty) {
-      // Default to current month if no sales yet
       activeMonths.add(DateTime.now().month);
     }
     activeMonths.sort();
@@ -423,7 +644,6 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
               Expanded(
                 child: Stack(
                   children: [
-                    // Gray Track Background
                     Container(
                       height: 16,
                       decoration: BoxDecoration(
@@ -431,7 +651,6 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    // Progress Indicator Bar
                     FractionallySizedBox(
                       widthFactor: percentage < 0.05 && percentage > 0 ? 0.05 : percentage,
                       child: Container(
@@ -458,4 +677,82 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
       }),
     );
   }
+
+  Widget _buildProductDetailsList(List<Transaksi> filtered, ThemeData theme) {
+    final summaries = _getProductSalesSummary(filtered);
+    if (summaries.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24.0),
+        child: Center(
+          child: Text('Tidak ada penjualan produk pada periode ini.', style: TextStyle(color: Colors.grey)),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              flex: 3,
+              child: Text('Produk', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
+            ),
+            Expanded(
+              flex: 1,
+              child: Text('Kuantitas', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text('Total Pendapatan', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
+            ),
+          ],
+        ),
+        const Divider(height: 16),
+        ...summaries.map((s) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    s.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    '${s.quantity}x',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey, fontSize: 13),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    _formatCurrency(s.revenue),
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.secondary, fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class ProductSalesSummary {
+  final String name;
+  int quantity;
+  double revenue;
+
+  ProductSalesSummary({required this.name, required this.quantity, required this.revenue});
 }

@@ -55,9 +55,18 @@ class StockPrediction {
     final finalMae = (rawMae / 250.0).clamp(2.0, 15.0).roundToDouble();
     final finalRmse = (rawRmse / 250.0).clamp(3.0, 25.0).roundToDouble();
 
+    String dynamicSeg;
+    if (actual >= 70.0) {
+      dynamicSeg = 'fast moving';
+    } else if (actual >= 45.0) {
+      dynamicSeg = 'medium moving';
+    } else {
+      dynamicSeg = 'slow moving';
+    }
+
     return StockPrediction(
       pfcoCode: pfco,
-      segment: seg,
+      segment: dynamicSeg,
       predictedQtyMonth1: m1,
       predictedQtyMonth2: m2,
       predictedQtyMonth3: m3,

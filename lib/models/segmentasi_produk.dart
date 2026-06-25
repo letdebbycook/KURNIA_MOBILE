@@ -34,14 +34,27 @@ class SegmentasiProduk {
     final finalPrice = MlScaler.getFabricPrice(pfco);
     final scaledTotal = scaledQty * finalPrice;
 
+    String dynamicSeg;
+    int dynamicCluster;
+    if (scaledQty >= 70.0) {
+      dynamicSeg = 'fast moving';
+      dynamicCluster = 1;
+    } else if (scaledQty >= 45.0) {
+      dynamicSeg = 'medium moving';
+      dynamicCluster = 2;
+    } else {
+      dynamicSeg = 'slow moving';
+      dynamicCluster = 0;
+    }
+
     return SegmentasiProduk(
       date: row[0].toString().trim(),
       quantitiesKgs: scaledQty,
       value: finalPrice,
       pfcoCode: pfco,
       totalValues: scaledTotal,
-      cluster: int.tryParse(row[5].toString().trim()) ?? 0,
-      segmentasiProduk: seg,
+      cluster: dynamicCluster,
+      segmentasiProduk: dynamicSeg,
     );
   }
 
