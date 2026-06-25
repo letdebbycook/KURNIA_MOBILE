@@ -154,7 +154,7 @@ def perform_clustering(df_sales, df_stock):
 
     # --- Standardize fitur untuk clustering ---
     cluster_features = [
-        'total_qty', 'total_value', 'avg_qty_per_trx',
+        'total_qty', 'avg_qty_per_trx',
         'transaction_count', 'avg_stok_akhir', 'turnover_ratio',
         'stockout_freq', 'overstock_freq',
     ]
@@ -309,9 +309,8 @@ def train_random_forest(df_sales, df_stock, product_agg):
     # --- Features & Target ---
     feature_cols = [
         'qty_lag_1', 'qty_lag_2', 'qty_lag_3',
-        'value_lag_1', 'value_lag_2', 'value_lag_3',
         'stok_lag_1', 'stok_lag_2', 'stok_lag_3',
-        'qty_rolling_3', 'value_rolling_3', 'stok_rolling_3',
+        'qty_rolling_3', 'stok_rolling_3',
         'month_num', 'segment_code', 'turnover_ratio',
         'safety_stock',
     ]
@@ -439,18 +438,15 @@ def train_random_forest(df_sales, df_stock, product_agg):
             new_features[0, 2] = new_features[0, 1]  # lag3 = old lag2
             new_features[0, 1] = new_features[0, 0]  # lag2 = old lag1
             new_features[0, 0] = pred                  # lag1 = prediction
-            # Shift value lags
-            new_features[0, 5] = new_features[0, 4]
-            new_features[0, 4] = new_features[0, 3]
             # Shift stok lags
-            new_features[0, 8] = new_features[0, 7]
-            new_features[0, 7] = new_features[0, 6]
-            new_features[0, 6] = max(0, new_features[0, 6] - pred + pred * 1.1)  # estimasi stok
-            # Update rolling averages
-            new_features[0, 9] = (new_features[0, 0] + new_features[0, 1] + new_features[0, 2]) / 3
+            new_features[0, 5] = new_features[0, 4]  # lag3 = old lag2
+            new_features[0, 4] = new_features[0, 3]  # lag2 = old lag1
+            new_features[0, 3] = max(0, new_features[0, 3] - pred + pred * 1.1)  # estimasi stok lag1
+            # Update rolling average qty
+            new_features[0, 6] = (new_features[0, 0] + new_features[0, 1] + new_features[0, 2]) / 3
             # Update month
-            current_month = int(new_features[0, 12])
-            new_features[0, 12] = (current_month % 12) + 1
+            current_month = int(new_features[0, 8])
+            new_features[0, 8] = (current_month % 12) + 1
 
             current_features = new_features
 
