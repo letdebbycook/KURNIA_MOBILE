@@ -21,6 +21,12 @@ class _AddProductViewState extends State<AddProductView> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
+  final _stockController = TextEditingController();
+  static const List<String> _categories = [
+    'Umum',
+    'Lain-lain',
+  ];
+  String _selectedCategory = 'Umum';
 
   final ImagePicker _picker = ImagePicker();
   Uint8List? _pickedImageBytes;
@@ -35,6 +41,9 @@ class _AddProductViewState extends State<AddProductView> {
       _nameController.text = widget.product!.name;
       _descriptionController.text = widget.product!.description;
       _priceController.text = widget.product!.price.toStringAsFixed(0);
+      _stockController.text = widget.product!.stok.toString();
+      final prodKategori = widget.product!.kategori;
+      _selectedCategory = _categories.contains(prodKategori) ? prodKategori : 'Lain-lain';
       if (widget.product!.imageUrl.startsWith('data:image/')) {
         try {
           final commaIndex = widget.product!.imageUrl.indexOf(',');
@@ -49,6 +58,8 @@ class _AddProductViewState extends State<AddProductView> {
       } else if (widget.product!.imageUrl.isNotEmpty) {
         _pickedImageName = 'Gambar Jaringan';
       }
+    } else {
+      _stockController.text = '0';
     }
   }
 
@@ -57,6 +68,7 @@ class _AddProductViewState extends State<AddProductView> {
     _nameController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
+    _stockController.dispose();
     super.dispose();
   }
 
@@ -212,6 +224,8 @@ class _AddProductViewState extends State<AddProductView> {
     final name = _nameController.text.trim();
     final description = _descriptionController.text.trim();
     final price = double.tryParse(_priceController.text.trim()) ?? 0.0;
+    final stock = int.tryParse(_stockController.text.trim()) ?? 0;
+    final kategori = _selectedCategory;
 
     String base64Image = widget.product?.imageUrl ?? '';
     if (_pickedImageBytes != null) {
@@ -224,6 +238,8 @@ class _AddProductViewState extends State<AddProductView> {
       description: description,
       price: price,
       imageUrl: base64Image,
+      kategori: kategori,
+      stok: stock,
     );
 
     final success = widget.product != null
@@ -358,6 +374,52 @@ class _AddProductViewState extends State<AddProductView> {
                   final parsed = double.tryParse(value);
                   if (parsed == null || parsed <= 0) {
                     return 'Masukkan harga yang valid (> 0)';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Product Category Dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                decoration: InputDecoration(
+                  labelText: 'Kategori Produk',
+                  prefixIcon: const Icon(Icons.category_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                items: _categories.map((cat) {
+                  return DropdownMenuItem<String>(
+                    value: cat,
+                    child: Text(cat),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() {
+                      _selectedCategory = val;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Product Stock Field
+              TextFormField(
+                controller: _stockController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Stok Produk',
+                  prefixIcon: const Icon(Icons.inventory_2_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Stok tidak boleh kosong';
+                  }
+                  final parsed = int.tryParse(value);
+                  if (parsed == null || parsed < 0) {
+                    return 'Masukkan jumlah stok yang valid (>= 0)';
                   }
                   return null;
                 },

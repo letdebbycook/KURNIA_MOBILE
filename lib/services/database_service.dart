@@ -48,6 +48,63 @@ class DatabaseService {
     if (_connection == null) {
       throw Exception('Could not connect to database on any configured hosts.');
     }
+
+    // Run schema migrations for localhost database
+    await runMigrations();
+  }
+
+  Future<void> runMigrations() async {
+    if (kIsWeb || _connection == null) return;
+    try {
+      // 1. Create notifikasi table if not exists
+      await conn.query('''
+        CREATE TABLE IF NOT EXISTS notifikasi (
+          id_notifikasi INT AUTO_INCREMENT PRIMARY KEY,
+          id_user INT NOT NULL,
+          judul VARCHAR(100) NOT NULL,
+          pesan TEXT NOT NULL,
+          is_read TINYINT(1) DEFAULT 0,
+          timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      ''');
+
+      // 2. Add kategori and stok columns to produk table if they do not exist
+      try {
+        await conn.query('ALTER TABLE produk ADD COLUMN kategori VARCHAR(50) DEFAULT "Lain-lain"');
+      } catch (_) {}
+      try {
+        await conn.query('ALTER TABLE produk ADD COLUMN stok INT DEFAULT 0');
+      } catch (_) {}
+
+      // 3. Create ulasan table if not exists
+      await conn.query('''
+        CREATE TABLE IF NOT EXISTS ulasan (
+          id_ulasan INT AUTO_INCREMENT PRIMARY KEY,
+          id_produk INT NOT NULL,
+          id_user INT NOT NULL,
+          rating INT NOT NULL,
+          komentar TEXT NULL,
+          timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (id_produk) REFERENCES produk(id_produk) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      ''');
+
+      // 4. Create address_book table if not exists
+      await conn.query('''
+        CREATE TABLE IF NOT EXISTS address_book (
+          id_alamat INT AUTO_INCREMENT PRIMARY KEY,
+          id_user INT NOT NULL,
+          label VARCHAR(50) NOT NULL,
+          nama_penerima VARCHAR(100) NOT NULL,
+          telepon_penerima VARCHAR(20) NOT NULL,
+          alamat_lengkap TEXT NOT NULL,
+          is_utama TINYINT(1) DEFAULT 0,
+          FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      ''');
+    } catch (e) {
+      print('Auto migration error: $e');
+    }
   }
 
   MySqlConnection get conn => _connection!;
@@ -265,6 +322,8 @@ class DatabaseService {
         description: row['deskripsi'],
         price: (row['harga'] as num).toDouble(),
         imageUrl: row['imageUrl'],
+        kategori: row['kategori'] ?? 'Lain-lain',
+        stok: row['stok'] ?? 0,
       );
     }).toList();
   }
@@ -291,14 +350,16 @@ class DatabaseService {
       await conn.query(
         '''
         INSERT INTO produk
-        (nama,deskripsi,harga,imageUrl)
-        VALUES(?,?,?,?)
+        (nama,deskripsi,harga,imageUrl,kategori,stok)
+        VALUES(?,?,?,?,?,?)
         ''',
         [
           product.name,
           product.description,
           product.price,
           product.imageUrl,
+          product.kategori,
+          product.stok,
         ],
       );
 
@@ -336,7 +397,9 @@ class DatabaseService {
         nama=?,
         deskripsi=?,
         harga=?,
-        imageUrl=?
+        imageUrl=?,
+        kategori=?,
+        stok=?
         WHERE id_produk=?
         ''',
         [
@@ -344,6 +407,8 @@ class DatabaseService {
           product.description,
           product.price,
           product.imageUrl,
+          product.kategori,
+          product.stok,
           product.idProduk,
         ],
       );
@@ -1009,6 +1074,284 @@ class DatabaseService {
   Future<int> getUnreadNotificationCount(int idUser) async {
     final list = await getNotifications(idUser);
     return list.where((n) => !n.isRead).length;
+  }
+
+  // ======================================================
+  // STOK MANAJEMEN
+  // ======================================================
+
+  Future<bool> reduceProductStock(int idProduk, int quantity) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.post(
+          Uri.parse('$_baseUrl?action=reduce_stock'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'id_produk': idProduk, 'quantity': quantity}),
+        );
+        if (response.statusCode == 200) {
+          final res = jsonDecode(response.body);
+          return res['status'] == 'success';
+        }
+      } catch (e) {
+        print('Web reduce stock error: $e');
+      }
+      return false;
+    }
+
+    try {
+      await conn.query(
+        'UPDATE produk SET stok = GREATEST(0, stok - ?) WHERE id_produk = ?',
+        [quantity, idProduk],
+      );
+      return true;
+    } catch (e) {
+      print('Native reduce stock error: $e');
+      return false;
+    }
+  }
+
+  // ======================================================
+  // ULASAN / RATING
+  // ======================================================
+
+  Future<List<Map<String, dynamic>>> getReviews(int idProduk) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.get(Uri.parse('$_baseUrl?action=get_reviews&id_produk=$idProduk'));
+        if (response.statusCode == 200) {
+          final List<dynamic> list = jsonDecode(response.body);
+          return list.map((item) => item as Map<String, dynamic>).toList();
+        }
+      } catch (e) {
+        print('Web get reviews error: $e');
+      }
+      return [];
+    }
+
+    try {
+      final result = await conn.query(
+        '''
+        SELECT u.*, us.nama AS user_nama
+        FROM ulasan u
+        LEFT JOIN users us ON u.id_user = us.id_user
+        WHERE u.id_produk = ?
+        ORDER BY u.id_ulasan DESC
+        ''',
+        [idProduk],
+      );
+      return result.map((row) => {
+        'id_ulasan': row['id_ulasan'],
+        'id_produk': row['id_produk'],
+        'id_user': row['id_user'],
+        'rating': row['rating'],
+        'komentar': row['komentar'] ?? '',
+        'timestamp': row['timestamp'].toString(),
+        'user_nama': row['user_nama'] ?? 'Pelanggan',
+      }).toList();
+    } catch (e) {
+      print('Native get reviews error: $e');
+      return [];
+    }
+  }
+
+  Future<bool> insertReview(int idProduk, int idUser, int rating, String komentar) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.post(
+          Uri.parse('$_baseUrl?action=insert_review'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'id_produk': idProduk,
+            'id_user': idUser,
+            'rating': rating,
+            'komentar': komentar,
+          }),
+        );
+        if (response.statusCode == 200) {
+          final res = jsonDecode(response.body);
+          return res['status'] == 'success';
+        }
+      } catch (e) {
+        print('Web insert review error: $e');
+      }
+      return false;
+    }
+
+    try {
+      await conn.query(
+        '''
+        INSERT INTO ulasan (id_produk, id_user, rating, komentar, timestamp)
+        VALUES (?, ?, ?, ?, ?)
+        ''',
+        [idProduk, idUser, rating, komentar, DateTime.now()],
+      );
+      return true;
+    } catch (e) {
+      print('Native insert review error: $e');
+      return false;
+    }
+  }
+
+  // ======================================================
+  // ADDRESS BOOK
+  // ======================================================
+
+  Future<List<Map<String, dynamic>>> getAddresses(int idUser) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.get(Uri.parse('$_baseUrl?action=get_addresses&id_user=$idUser'));
+        if (response.statusCode == 200) {
+          final List<dynamic> list = jsonDecode(response.body);
+          return list.map((item) => item as Map<String, dynamic>).toList();
+        }
+      } catch (e) {
+        print('Web get addresses error: $e');
+      }
+      return [];
+    }
+
+    try {
+      final result = await conn.query(
+        'SELECT * FROM address_book WHERE id_user = ? ORDER BY is_utama DESC, id_alamat DESC',
+        [idUser],
+      );
+      return result.map((row) => {
+        'id_alamat': row['id_alamat'],
+        'id_user': row['id_user'],
+        'label': row['label'] ?? '',
+        'nama_penerima': row['nama_penerima'] ?? '',
+        'telepon_penerima': row['telepon_penerima'] ?? '',
+        'alamat_lengkap': row['alamat_lengkap'] ?? '',
+        'is_utama': row['is_utama'] == 1,
+      }).toList();
+    } catch (e) {
+      print('Native get addresses error: $e');
+      return [];
+    }
+  }
+
+  Future<bool> insertAddress(int idUser, String label, String nama, String telepon, String alamat, bool isUtama) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.post(
+          Uri.parse('$_baseUrl?action=insert_address'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'id_user': idUser,
+            'label': label,
+            'nama_penerima': nama,
+            'telepon_penerima': telepon,
+            'alamat_lengkap': alamat,
+            'is_utama': isUtama ? 1 : 0,
+          }),
+        );
+        if (response.statusCode == 200) {
+          final res = jsonDecode(response.body);
+          return res['status'] == 'success';
+        }
+      } catch (e) {
+        print('Web insert address error: $e');
+      }
+      return false;
+    }
+
+    try {
+      if (isUtama) {
+        // Reset other addresses to is_utama = 0
+        await conn.query('UPDATE address_book SET is_utama = 0 WHERE id_user = ?', [idUser]);
+      }
+      await conn.query(
+        '''
+        INSERT INTO address_book (id_user, label, nama_penerima, telepon_penerima, alamat_lengkap, is_utama)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ''',
+        [idUser, label, nama, telepon, alamat, isUtama ? 1 : 0],
+      );
+      return true;
+    } catch (e) {
+      print('Native insert address error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateAddress(int idAlamat, String label, String nama, String telepon, String alamat, bool isUtama, int idUser) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.post(
+          Uri.parse('$_baseUrl?action=update_address'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'id_alamat': idAlamat,
+            'label': label,
+            'nama_penerima': nama,
+            'telepon_penerima': telepon,
+            'alamat_lengkap': alamat,
+            'is_utama': isUtama ? 1 : 0,
+          }),
+        );
+        if (response.statusCode == 200) {
+          final res = jsonDecode(response.body);
+          return res['status'] == 'success';
+        }
+      } catch (e) {
+        print('Web update address error: $e');
+      }
+      return false;
+    }
+
+    try {
+      if (isUtama) {
+        // Reset other addresses to is_utama = 0
+        await conn.query('UPDATE address_book SET is_utama = 0 WHERE id_user = ?', [idUser]);
+      }
+      await conn.query(
+        '''
+        UPDATE address_book
+        SET label = ?, nama_penerima = ?, telepon_penerima = ?, alamat_lengkap = ?, is_utama = ?
+        WHERE id_alamat = ?
+        ''',
+        [label, nama, telepon, alamat, isUtama ? 1 : 0, idAlamat],
+      );
+      return true;
+    } catch (e) {
+      print('Native update address error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deleteAddress(int idAlamat) async {
+    if (kIsWeb) {
+      try {
+        final response = await http.get(Uri.parse('$_baseUrl?action=delete_address&id=$idAlamat'));
+        if (response.statusCode == 200) {
+          final res = jsonDecode(response.body);
+          return res['status'] == 'success';
+        }
+      } catch (e) {
+        print('Web delete address error: $e');
+      }
+      return false;
+    }
+
+    try {
+      await conn.query('DELETE FROM address_book WHERE id_alamat = ?', [idAlamat]);
+      return true;
+    } catch (e) {
+      print('Native delete address error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> setPrimaryAddress(int idUser, int idAlamat) async {
+    if (kIsWeb) return false;
+    try {
+      await conn.query('UPDATE address_book SET is_utama = 0 WHERE id_user = ?', [idUser]);
+      await conn.query('UPDATE address_book SET is_utama = 1 WHERE id_alamat = ?', [idAlamat]);
+      return true;
+    } catch (e) {
+      print('Native set primary address error: $e');
+      return false;
+    }
   }
 
   Future<void> close() async {
