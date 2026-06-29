@@ -54,6 +54,9 @@ class _PaymentViewState extends State<PaymentView> {
 
     // Call database setData() -> saveTransaksi
     final success = await _dbService.saveTransaksi(order);
+    if (success && widget.product.idProduk != null) {
+      await _dbService.reduceProductStock(widget.product.idProduk!, 1);
+    }
 
     if (!mounted) return;
 

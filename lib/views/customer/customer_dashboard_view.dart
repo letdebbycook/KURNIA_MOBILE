@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/database_service.dart';
 import '../../services/cart_service.dart';
 import '../../services/wishlist_service.dart';
@@ -29,6 +30,10 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
   bool _isLoading = true;
   final _searchController = TextEditingController();
   int _currentPage = 1;
+  String _selectedCategory = 'Semua';
+  double? _minPrice;
+  double? _maxPrice;
+  String _sortBy = 'Terbaru';
 
   // Bottom Navigation tab index
   int _currentIndex = 0;
@@ -37,14 +42,34 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
   void initState() {
     super.initState();
     _loadProducts();
-    _searchController.addListener(_onSearchChanged);
+    _searchController.addListener(_onSearchOrCategoryChanged);
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
+    _searchController.removeListener(_onSearchOrCategoryChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _launchWhatsApp() async {
+    final url = Uri.parse('https://wa.me/+6285355443060');
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tidak dapat membuka WhatsApp. Silakan hubungi +6285355443060.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _loadProducts() async {
@@ -63,13 +88,34 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
     });
   }
 
-  void _onSearchChanged() {
+  void _onSearchOrCategoryChanged() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      _filteredProducts = _products.where((product) {
-        return product.name.toLowerCase().contains(query) ||
+      var temp = _products.where((product) {
+        final matchesQuery = product.name.toLowerCase().contains(query) ||
             product.description.toLowerCase().contains(query);
+        final matchesCategory = _selectedCategory == 'Semua' ||
+            product.kategori == _selectedCategory;
+        final matchesMinPrice = _minPrice == null || product.price >= _minPrice!;
+        final matchesMaxPrice = _maxPrice == null || product.price <= _maxPrice!;
+        return matchesQuery && matchesCategory && matchesMinPrice && matchesMaxPrice;
       }).toList();
+
+      if (_sortBy == 'Terbaru') {
+        temp.sort((a, b) => (b.idProduk ?? 0).compareTo(a.idProduk ?? 0));
+      } else if (_sortBy == 'Terlama') {
+        temp.sort((a, b) => (a.idProduk ?? 0).compareTo(b.idProduk ?? 0));
+      } else if (_sortBy == 'Harga Terendah') {
+        temp.sort((a, b) => a.price.compareTo(b.price));
+      } else if (_sortBy == 'Harga Tertinggi') {
+        temp.sort((a, b) => b.price.compareTo(a.price));
+      } else if (_sortBy == 'Nama A-Z') {
+        temp.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      } else if (_sortBy == 'Nama Z-A') {
+        temp.sort((a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
+      }
+
+      _filteredProducts = temp;
       _currentPage = 1;
     });
   }
@@ -145,12 +191,23 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                     style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _formatCurrency(product.price),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.secondary,
+                        ),
+                      ),
+                      _buildStockBadge(product.stok),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   Text(
-                    _formatCurrency(product.price),
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.secondary,
-                    ),
+                    'Kategori: ${product.kategori}',
+                    style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
                   ),
                   const SizedBox(height: 16),
                   const Divider(),
@@ -164,12 +221,141 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                     product.description,
                     style: TextStyle(color: Colors.grey.shade700, height: 1.5, fontSize: 14),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  
+                  // Product Reviews Section
+                  FutureBuilder<List<Map<String, dynamic>>>(
+                    future: _dbService.getReviews(product.idProduk!),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: CircularProgressIndicator(),
+                        ));
+                      }
+                      final reviews = snapshot.data ?? [];
+                      double avgRating = 0.0;
+                      if (reviews.isNotEmpty) {
+                        final totalRating = reviews.fold<int>(0, (sum, item) => sum + (item['rating'] as int));
+                        avgRating = totalRating / reviews.length;
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Ulasan Produk',
+                                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              Row(
+                                children: [
+                                  const Icon(Icons.star, color: Colors.amber, size: 20),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    reviews.isEmpty
+                                        ? 'Belum ada ulasan'
+                                        : '${avgRating.toStringAsFixed(1)} / 5.0 (${reviews.length})',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          if (reviews.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Text(
+                                'Belum ada ulasan untuk produk ini.',
+                                style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontStyle: FontStyle.italic),
+                              ),
+                            )
+                          else
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: reviews.length > 3 ? 3 : reviews.length, // Show up to 3 reviews
+                              itemBuilder: (context, index) {
+                                final rev = reviews[index];
+                                return Card(
+                                  margin: const EdgeInsets.only(bottom: 8.0),
+                                  color: Colors.grey.shade50,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: BorderSide(color: Colors.grey.shade200),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                rev['user_nama'] as String,
+                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            Row(
+                                              children: List.generate(5, (starIdx) {
+                                                return Icon(
+                                                  starIdx < (rev['rating'] as int)
+                                                      ? Icons.star
+                                                      : Icons.star_border,
+                                                  color: Colors.amber,
+                                                  size: 12,
+                                                );
+                                              }),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          rev['komentar'] as String,
+                                          style: TextStyle(color: Colors.grey.shade800, fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          if (reviews.length > 3)
+                            TextButton(
+                              onPressed: () {
+                                _showAllReviewsDialog(product, reviews);
+                              },
+                              child: const Text('Lihat Semua Ulasan'),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {
+                          onPressed: product.stok <= 0 ? null : () {
+                            if (_cartService.quantityOf(product) >= product.stok) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Batas stok tercapai! Stok tersedia: ${product.stok}'),
+                                  backgroundColor: Colors.orange.shade800,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
                             _cartService.addProduct(product);
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -182,8 +368,8 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                               ),
                             );
                           },
-                          icon: const Icon(Icons.add_shopping_cart, size: 18),
-                          label: const Text('Keranjang', style: TextStyle(fontWeight: FontWeight.bold)),
+                          icon: Icon(product.stok <= 0 ? Icons.inventory_2_outlined : Icons.add_shopping_cart, size: 18),
+                          label: Text(product.stok <= 0 ? 'Stok Habis' : 'Keranjang', style: const TextStyle(fontWeight: FontWeight.bold)),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -193,7 +379,17 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () {
+                          onPressed: product.stok <= 0 ? null : () {
+                            if (_cartService.quantityOf(product) >= product.stok) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Batas stok tercapai! Stok tersedia: ${product.stok}'),
+                                  backgroundColor: Colors.orange.shade800,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
                             _cartService.addProduct(product);
                             Navigator.pop(context);
                             Navigator.push(
@@ -378,7 +574,14 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                         });
                       },
                     )
-                  : ProfileView(username: widget.username),
+                  : ProfileView(username: widget.username, idUser: widget.idUser),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _launchWhatsApp,
+        backgroundColor: const Color(0xFF25D366),
+        foregroundColor: Colors.white,
+        tooltip: 'Customer Service WhatsApp',
+        child: const Icon(Icons.chat_outlined, size: 28),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -456,25 +659,77 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                         style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                       const SizedBox(height: 16),
-                      // Search bar
-                      TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Cari Kain ...',
-                          prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                      // Search bar with advanced filter button
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Cari Kain ...',
+                                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
+                              ),
+                            ),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
-                        ),
+                          const SizedBox(width: 10),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              icon: Icon(Icons.tune, color: theme.colorScheme.primary),
+                              onPressed: _showAdvancedFilterSheet,
+                              tooltip: 'Pencarian Lanjut',
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
+
+                // Horizontal Category Chips
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: ['Semua', 'Umum', 'Lain-lain'].map((cat) {
+                      final isSelected = _selectedCategory == cat;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0, bottom: 12.0),
+                        child: ChoiceChip(
+                          label: Text(
+                            cat,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black87,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
+                          selected: isSelected,
+                          selectedColor: theme.colorScheme.primary,
+                          backgroundColor: Colors.grey.shade200,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setState(() {
+                                _selectedCategory = cat;
+                              });
+                              _onSearchOrCategoryChanged();
+                            }
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 8),
 
                 Text(
                   'Katalog Produk Tersedia',
@@ -614,14 +869,25 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                                           ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            product.description,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+                                          const SizedBox(height: 2),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                product.kategori,
+                                                style: TextStyle(color: theme.colorScheme.primary, fontSize: 10, fontWeight: FontWeight.bold),
+                                              ),
+                                              Text(
+                                                product.stok > 0 ? 'Stok: ${product.stok}' : 'Habis',
+                                                style: TextStyle(
+                                                  color: product.stok > 0 ? (product.stok <= 5 ? Colors.orange : Colors.grey.shade600) : Colors.red,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          const SizedBox(height: 6),
+                                          const SizedBox(height: 4),
                                           Text(
                                             _formatCurrency(product.price),
                                             maxLines: 1,
@@ -637,6 +903,24 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                                             listenable: _cartService,
                                             builder: (context, _) {
                                               final qty = _cartService.quantityOf(product);
+                                              
+                                              if (product.stok <= 0) {
+                                                return SizedBox(
+                                                  width: double.infinity,
+                                                  child: ElevatedButton.icon(
+                                                    onPressed: null,
+                                                    icon: const Icon(Icons.inventory_2_outlined, size: 14),
+                                                    label: const Text('Stok Habis', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                                                    style: ElevatedButton.styleFrom(
+                                                      padding: const EdgeInsets.symmetric(vertical: 6),
+                                                      backgroundColor: Colors.grey.shade300,
+                                                      foregroundColor: Colors.grey.shade600,
+                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+
                                               return qty == 0
                                                   ? SizedBox(
                                                       width: double.infinity,
@@ -684,7 +968,20 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
                                                         ),
                                                         Text('$qty', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                                                         GestureDetector(
-                                                          onTap: () => _cartService.incrementQuantity(product),
+                                                          onTap: () {
+                                                            if (qty >= product.stok) {
+                                                              ScaffoldMessenger.of(context).clearSnackBars();
+                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                SnackBar(
+                                                                  content: Text('Batas stok tercapai! Stok tersedia: ${product.stok}'),
+                                                                  backgroundColor: Colors.orange.shade800,
+                                                                  behavior: SnackBarBehavior.floating,
+                                                                ),
+                                                              );
+                                                            } else {
+                                                              _cartService.incrementQuantity(product);
+                                                            }
+                                                          },
                                                           child: Container(
                                                             width: 28,
                                                             height: 28,
@@ -765,6 +1062,287 @@ class _CustomerDashboardViewState extends State<CustomerDashboardView> {
           color: theme.colorScheme.primary,
         ),
       ],
+    );
+  }
+
+  Widget _buildStockBadge(int stok) {
+    Color color = Colors.green;
+    String label = 'Stok: $stok';
+    if (stok == 0) {
+      color = Colors.red;
+      label = 'Habis';
+    } else if (stok <= 5) {
+      color = Colors.orange;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        border: Border.all(color: color, width: 1.2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  void _showAllReviewsDialog(Product product, List<Map<String, dynamic>> reviews) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text('Semua Ulasan - ${product.name}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: reviews.length,
+              itemBuilder: (context, index) {
+                final rev = reviews[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12.0),
+                  color: Colors.grey.shade50,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                rev['user_nama'] as String,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Row(
+                              children: List.generate(5, (starIdx) {
+                                return Icon(
+                                  starIdx < (rev['rating'] as int)
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  color: Colors.amber,
+                                  size: 12,
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          rev['komentar'] as String,
+                          style: TextStyle(color: Colors.grey.shade800, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Tutup'),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAdvancedFilterSheet() {
+    final theme = Theme.of(context);
+    final minController = TextEditingController(text: _minPrice?.toStringAsFixed(0) ?? '');
+    final maxController = TextEditingController(text: _maxPrice?.toStringAsFixed(0) ?? '');
+    String tempSortBy = _sortBy;
+    String tempCategory = _selectedCategory;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                left: 24,
+                right: 24,
+                top: 24,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Pencarian Lanjut',
+                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Kategori',
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: tempCategory,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      items: ['Semua', 'Umum', 'Lain-lain'].map((cat) {
+                        return DropdownMenuItem(value: cat, child: Text(cat));
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setSheetState(() => tempCategory = val);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Rentang Harga',
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: minController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Harga Min',
+                              prefixText: 'Rp ',
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: maxController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Harga Max',
+                              prefixText: 'Rp ',
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Urutkan Berdasarkan',
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: tempSortBy,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      items: [
+                        'Terbaru',
+                        'Terlama',
+                        'Harga Terendah',
+                        'Harga Tertinggi',
+                        'Nama A-Z',
+                        'Nama Z-A'
+                      ].map((sort) {
+                        return DropdownMenuItem(value: sort, child: Text(sort));
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setSheetState(() => tempSortBy = val);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                _minPrice = null;
+                                _maxPrice = null;
+                                _sortBy = 'Terbaru';
+                                _selectedCategory = 'Semua';
+                              });
+                              _onSearchOrCategoryChanged();
+                              Navigator.pop(context);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: const Text('Reset', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _minPrice = double.tryParse(minController.text);
+                                _maxPrice = double.tryParse(maxController.text);
+                                _sortBy = tempSortBy;
+                                _selectedCategory = tempCategory;
+                              });
+                              _onSearchOrCategoryChanged();
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              backgroundColor: theme.colorScheme.primary,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: const Text('Terapkan', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

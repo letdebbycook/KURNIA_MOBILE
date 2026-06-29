@@ -85,15 +85,154 @@ class _CheckoutViewState extends State<CheckoutView> {
       final user = users.firstWhere((u) => u.idUser == widget.idUser);
       final profile = await _dbService.getUserProfile(user.username);
       
+      // Load primary address from address book
+      final addresses = await _dbService.getAddresses(widget.idUser);
+      final primaryAddr = addresses.firstWhere(
+        (a) => a['is_utama'] == true,
+        orElse: () => addresses.isNotEmpty ? addresses.first : {},
+      );
+
       setState(() {
         _profile = profile;
-        _namaPenerimaController.text = profile.fullName.isNotEmpty ? profile.fullName : user.nama;
-        _teleponController.text = profile.phoneNumber.isNotEmpty ? profile.phoneNumber : user.telepon;
-        _alamatController.text = profile.alamat;
+        if (primaryAddr.isNotEmpty) {
+          _namaPenerimaController.text = primaryAddr['nama_penerima'];
+          _teleponController.text = primaryAddr['telepon_penerima'];
+          _alamatController.text = primaryAddr['alamat_lengkap'];
+        } else {
+          _namaPenerimaController.text = profile.fullName.isNotEmpty ? profile.fullName : user.nama;
+          _teleponController.text = profile.phoneNumber.isNotEmpty ? profile.phoneNumber : user.telepon;
+          _alamatController.text = profile.alamat;
+        }
       });
     } catch (e) {
       debugPrint('Error loading user profile: $e');
     }
+  }
+
+  void _showAddressPicker() async {
+    final theme = Theme.of(context);
+    setState(() => _isLoadingShipping = true);
+    await _dbService.init();
+    final addresses = await _dbService.getAddresses(widget.idUser);
+    setState(() => _isLoadingShipping = false);
+
+    if (addresses.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Anda belum memiliki alamat tersimpan. Silakan tambahkan di profil.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Pilih Alamat Pengiriman',
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: addresses.length,
+                  itemBuilder: (context, index) {
+                    final addr = addresses[index];
+                    final isUtama = addr['is_utama'] as bool;
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: isUtama ? theme.colorScheme.primary : Colors.grey.shade200,
+                          width: isUtama ? 1.5 : 1.0,
+                        ),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(12),
+                        title: Row(
+                          children: [
+                            Text(
+                              addr['label'],
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                            if (isUtama) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.shade50,
+                                  border: Border.all(color: Colors.orange),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'Utama',
+                                  style: TextStyle(color: Colors.orange, fontSize: 8, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 6),
+                            Text(
+                              '${addr['nama_penerima']} (${addr['telepon_penerima']})',
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.black87),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              addr['alamat_lengkap'],
+                              style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          setState(() {
+                            _namaPenerimaController.text = addr['nama_penerima'];
+                            _teleponController.text = addr['telepon_penerima'];
+                            _alamatController.text = addr['alamat_lengkap'];
+                          });
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _loadProvinces() async {
@@ -319,6 +458,9 @@ class _CheckoutViewState extends State<CheckoutView> {
           await _dbService.saveUserProfile(updatedProfile);
         }
 
+        // NOTE: Stok produk dikurangi oleh server (api.php) saat
+        // status Midtrans dikonfirmasi sebagai 'success' — bukan di sini.
+
         // Launch the payment redirection page
         _openPayment(redirectUrl);
       }
@@ -485,6 +627,25 @@ class _CheckoutViewState extends State<CheckoutView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Alamat Pengiriman',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: theme.colorScheme.primary),
+                      ),
+                      TextButton.icon(
+                        onPressed: _showAddressPicker,
+                        icon: const Icon(Icons.import_contacts_outlined, size: 16),
+                        label: const Text('Pilih dari Alamat', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        style: TextButton.styleFrom(
+                          foregroundColor: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _namaPenerimaController,
                     decoration: InputDecoration(

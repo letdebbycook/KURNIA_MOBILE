@@ -4,6 +4,7 @@ import 'dart:js' as js;
 import 'package:flutter/foundation.dart';
 import '../../services/database_service.dart';
 import '../../models/transaksi.dart';
+import '../../models/product.dart';
 import '../../widgets/product_image_helper.dart';
 
 class OrderHistoryView extends StatefulWidget {
@@ -509,6 +510,31 @@ class _OrderHistoryViewState extends State<OrderHistoryView> {
                                         '${item.jumlah} pcs x ${_formatCurrency(item.hargaSatuan)}',
                                         style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
                                       ),
+                                      if (order.statusPembayaran.toLowerCase() == 'success' ||
+                                          order.statusPembayaran.toLowerCase() == 'settlement' ||
+                                          order.statusPembayaran.toLowerCase() == 'capture') ...[
+                                        const SizedBox(height: 4),
+                                        InkWell(
+                                          onTap: () {
+                                            _showWriteReviewDialog(item.idProduk, item.namaProduk);
+                                          },
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.rate_review_outlined, size: 14, color: theme.colorScheme.primary),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                'Beri Ulasan',
+                                                style: TextStyle(
+                                                  color: theme.colorScheme.primary,
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ],
                                   ),
                                 ),
@@ -570,21 +596,56 @@ class _OrderHistoryViewState extends State<OrderHistoryView> {
                           ),
                         ],
                       ] else ...[
-                        Row(
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: Text(
-                                order.productName,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    order.productName,
+                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Text(
+                                  _formatCurrency(order.total),
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                            if (order.statusPembayaran.toLowerCase() == 'success' ||
+                                order.statusPembayaran.toLowerCase() == 'settlement' ||
+                                order.statusPembayaran.toLowerCase() == 'capture') ...[
+                              const SizedBox(height: 8),
+                              ElevatedButton.icon(
+                                onPressed: () async {
+                                  // Find the product ID from products list matching the product name
+                                  final products = await _dbService.getProducts();
+                                  final match = products.firstWhere(
+                                    (p) => p.name.toLowerCase() == order.productName.toLowerCase(),
+                                    orElse: () => Product(name: order.productName, description: '', price: 0, imageUrl: ''),
+                                  );
+                                  if (match.idProduk != null) {
+                                    _showWriteReviewDialog(match.idProduk!, match.name);
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Produk tidak ditemukan di katalog')),
+                                    );
+                                  }
+                                },
+                                icon: const Icon(Icons.rate_review_outlined, size: 14),
+                                label: const Text('Beri Ulasan Produk', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  backgroundColor: theme.colorScheme.primaryContainer,
+                                  foregroundColor: theme.colorScheme.primary,
+                                  elevation: 0,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Text(
-                              _formatCurrency(order.total),
-                              style: const TextStyle(fontWeight: FontWeight.w600),
-                            ),
+                            ],
                           ],
                         ),
                       ],
@@ -1249,6 +1310,110 @@ class _OrderHistoryViewState extends State<OrderHistoryView> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showWriteReviewDialog(int idProduk, String productName) {
+    int rating = 5;
+    final komentarController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Text('Beri Ulasan\n$productName', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Pilih Rating:', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      final starNum = index + 1;
+                      final isSelected = starNum <= rating;
+                      return GestureDetector(
+                        onTap: () {
+                          setDialogState(() {
+                            rating = starNum;
+                          });
+                        },
+                        child: Icon(
+                          isSelected ? Icons.star : Icons.star_border,
+                          color: Colors.amber,
+                          size: 36,
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Tulis Ulasan Anda:', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: komentarController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'Tulis komentar ulasan...',
+                      hintStyle: TextStyle(fontSize: 12.5, color: Colors.grey.shade400),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.all(12),
+                    ),
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final comment = komentarController.text.trim();
+                    if (comment.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Ulasan tidak boleh kosong!'), backgroundColor: Colors.red),
+                      );
+                      return;
+                    }
+                    
+                    final success = await _dbService.insertReview(idProduk, widget.idUser, rating, comment);
+                    if (mounted) Navigator.pop(context);
+                    
+                    if (success) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Ulasan Anda berhasil dikirim! Terima kasih.'),
+                            backgroundColor: Colors.green.shade600,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    } else {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Gagal mengirim ulasan.'), backgroundColor: Colors.red),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Kirim'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

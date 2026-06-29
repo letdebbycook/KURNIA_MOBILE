@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/database_service.dart';
 import '../../models/user_profile.dart';
+import 'address_book_view.dart';
 
 class ProfileView extends StatefulWidget {
   final String username;
-  const ProfileView({super.key, required this.username});
+  final int idUser;
+  const ProfileView({super.key, required this.username, required this.idUser});
 
   @override
   State<ProfileView> createState() => _ProfileViewState();
@@ -530,7 +532,26 @@ class _ProfileViewState extends State<ProfileView> {
                   ],
                 ],
               ),
-            const SizedBox(height: 36),
+            const SizedBox(height: 24),
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddressBookView(idUser: widget.idUser),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.import_contacts_outlined),
+              label: const Text('BUKU ALAMAT SAYA', style: TextStyle(fontWeight: FontWeight.bold)),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                side: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                foregroundColor: theme.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 24),
 
             // Save Buttons
             ElevatedButton(
