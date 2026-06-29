@@ -349,18 +349,30 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
                                           children: [
                                             const SizedBox(height: 4),
                                             Text(
+                                              'Kategori: ${product.kategori}',
+                                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
                                               product.description,
-                                              maxLines: 2,
+                                              maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                                             ),
                                             const SizedBox(height: 6),
-                                            Text(
-                                              _formatCurrency(product.price),
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: theme.colorScheme.secondary,
-                                              ),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  _formatCurrency(product.price),
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: theme.colorScheme.secondary,
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                                _buildStockBadge(product.stok),
+                                              ],
                                             ),
                                           ],
                                         ),
@@ -453,13 +465,24 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
                     product.name,
                     style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _formatCurrency(product.price),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.secondary,
+                        ),
+                      ),
+                      _buildStockBadge(product.stok),
+                    ],
+                  ),
                   const SizedBox(height: 8),
                   Text(
-                    _formatCurrency(product.price),
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.secondary,
-                    ),
+                    'Kategori: ${product.kategori}',
+                    style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
                   ),
                   const SizedBox(height: 16),
                   const Divider(),
@@ -574,6 +597,33 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
           color: theme.colorScheme.primary,
         ),
       ],
+    );
+  }
+
+  Widget _buildStockBadge(int stok) {
+    Color color = Colors.green;
+    String label = 'Stok: $stok';
+    if (stok == 0) {
+      color = Colors.red;
+      label = 'Habis';
+    } else if (stok <= 5) {
+      color = Colors.orange;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        border: Border.all(color: color, width: 1.2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }

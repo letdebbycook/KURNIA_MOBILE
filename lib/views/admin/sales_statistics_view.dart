@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:csv/csv.dart';
+import 'dart:js' as js;
 import '../../services/database_service.dart';
 import '../../services/ml_service.dart';
 import '../../models/transaksi.dart';
@@ -224,6 +228,108 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
     return 'Rp ${buffer.toString().split('').reversed.join('')}';
   }
 
+  Future<void> _exportReportToCsv() async {
+    if (_filteredOrders.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tidak ada data transaksi untuk diekspor pada periode ini.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      List<List<dynamic>> rows = [];
+      rows.add([
+        'ID Transaksi',
+        'Waktu',
+        'Metode Bayar',
+        'Penerima',
+        'Telepon',
+        'Alamat',
+        'Produk',
+        'Total Pembayaran',
+        'Status'
+      ]);
+
+      for (var order in _filteredOrders) {
+        rows.add([
+          order.idTransaksi ?? '',
+          order.timestamp.toString(),
+          order.metodeBayar,
+          order.userNama ?? '',
+          order.userTelepon ?? '',
+          order.userAlamat ?? '',
+          order.productName,
+          order.total,
+          order.statusPembayaran,
+        ]);
+      }
+
+      final csvString = const ListToCsvConverter().convert(rows);
+
+      if (kIsWeb) {
+        try {
+          js.context.callMethod('downloadCsv', [csvString, 'laporan_penjualan_${_selectedPeriod.replaceAll(" ", "_")}.csv']);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Laporan CSV berhasil diunduh!'),
+              backgroundColor: Colors.teal,
+            ),
+          );
+        } catch (e) {
+          debugPrint('Web CSV download error: $e');
+        }
+      } else {
+        await Clipboard.setData(ClipboardData(text: csvString));
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green),
+                  SizedBox(width: 8),
+                  Text('Ekspor Laporan Berhasil', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Data laporan penjualan telah disalin ke Clipboard (Copy).',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Anda dapat langsung melakukan "Paste" (Ctrl+V) di Google Sheets, Microsoft Excel, atau aplikasi pengolah data lainnya.',
+                    style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Tutup'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal mengekspor laporan: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -237,6 +343,11 @@ class _SalesStatisticsViewState extends State<SalesStatisticsView> {
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download_outlined),
+            onPressed: _exportReportToCsv,
+            tooltip: 'Ekspor Laporan CSV',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _fetchTransactions,
